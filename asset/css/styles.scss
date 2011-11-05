@@ -1,0 +1,388 @@
+@mixin cupid-green {
+  background-color: #7fbf4d;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#7fbf4d), to(#63a62f));
+  /* Saf4+, Chrome */
+  background-image: -webkit-linear-gradient(top, #7fbf4d, #63a62f);
+  background-image: -moz-linear-gradient(top, #7fbf4d, #63a62f);
+  background-image: -ms-linear-gradient(top, #7fbf4d, #63a62f);
+  background-image: -o-linear-gradient(top, #7fbf4d, #63a62f);
+  background-image: linear-gradient(top, #7fbf4d, #63a62f);
+  border: 1px solid #63a62f;
+  border-bottom: 1px solid #5b992b;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+  border-radius: 5px;
+  -webkit-box-shadow: inset 0 1px 0 0 #96ca6d;
+  -moz-box-shadow: inset 0 1px 0 0 #96ca6d;
+  -ms-box-shadow: inset 0 1px 0 0 #96ca6d;
+  -o-box-shadow: inset 0 1px 0 0 #96ca6d;
+  box-shadow: inset 0 1px 0 0 #96ca6d;
+  color: #BAF0B4;
+  line-height: 1.5;
+  padding: 10px 0 8px 0;
+  text-align: center;
+  text-shadow: 0 -1px 0 #4c9021;
+  width: 70%;
+  text-decoration: none;
+  font-size: 1.8em;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  
+  &:hover {
+    background-color: #76b347;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#76b347), to(#5e9e2e));
+    /* Saf4+, Chrome */
+    background-image: -webkit-linear-gradient(top, #76b347, #5e9e2e);
+    background-image: -moz-linear-gradient(top, #76b347, #5e9e2e);
+    background-image: -ms-linear-gradient(top, #76b347, #5e9e2e);
+    background-image: -o-linear-gradient(top, #76b347, #5e9e2e);
+    background-image: linear-gradient(top, #76b347, #5e9e2e);
+    -webkit-box-shadow: inset 0 1px 0 0 #8dbf67;
+    -moz-box-shadow: inset 0 1px 0 0 #8dbf67;
+    -ms-box-shadow: inset 0 1px 0 0 #8dbf67;
+    -o-box-shadow: inset 0 1px 0 0 #8dbf67;
+    box-shadow: inset 0 1px 0 0 #8dbf67;
+    cursor: pointer; }
+  &:active {
+    border: 1px solid #5b992b;
+    border-bottom: 1px solid #538c27;
+    -webkit-box-shadow: inset 0 0 8px 4px #548c29, 0 1px 0 0 #eeeeee;
+    -moz-box-shadow: inset 0 0 8px 4px #548c29, 0 1px 0 0 #eeeeee;
+    -ms-box-shadow: inset 0 0 8px 4px #548c29, 0 1px 0 0 #eeeeee;
+    -o-box-shadow: inset 0 0 8px 4px #548c29, 0 1px 0 0 #eeeeee;
+    box-shadow: inset 0 0 8px 4px #548c29, 0 1px 0 0 #eeeeee; }
+}
+
+@mixin cupid-blue {
+  background-color: #d7e5f5;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#d7e5f5), to(#cbe0f5));
+  /* Saf4+, Chrome */
+  background-image: -webkit-linear-gradient(top, #d7e5f5, #cbe0f5);
+  background-image: -moz-linear-gradient(top, #d7e5f5, #cbe0f5);
+  background-image: -ms-linear-gradient(top, #d7e5f5, #cbe0f5);
+  background-image: -o-linear-gradient(top, #d7e5f5, #cbe0f5);
+  background-image: linear-gradient(top, #d7e5f5, #cbe0f5);
+  border-top: 1px solid #abbbcc;
+  border-left: 1px solid #a7b6c7;
+  border-bottom: 1px solid #a1afbf;
+  border-right: 1px solid #a7b6c7;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
+  border-radius: 15px;
+  -webkit-box-shadow: inset 0 1px 0 0 white;
+  -moz-box-shadow: inset 0 1px 0 0 white;
+  -ms-box-shadow: inset 0 1px 0 0 white;
+  -o-box-shadow: inset 0 1px 0 0 white;
+  box-shadow: inset 0 1px 0 0 white;
+  color: #1a3e66;
+  line-height: 1;
+  padding: 0.7em 1.4em 0.6em 1.4em;
+  font-size: 12px;
+  text-align: center;
+  text-shadow: 0 1px 1px #fff;
+  text-decoration: none;
+
+  &:hover {
+    background-color: #ccd9e8;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#ccd9e8), to(#c1d4e8));
+    /* Saf4+, Chrome */
+    background-image: -webkit-linear-gradient(top, #ccd9e8, #c1d4e8);
+    background-image: -moz-linear-gradient(top, #ccd9e8, #c1d4e8);
+    background-image: -ms-linear-gradient(top, #ccd9e8, #c1d4e8);
+    background-image: -o-linear-gradient(top, #ccd9e8, #c1d4e8);
+    background-image: linear-gradient(top, #ccd9e8, #c1d4e8);
+    border-top: 1px solid #a1afbf;
+    border-left: 1px solid #9caaba;
+    border-bottom: 1px solid #96a3b3;
+    border-right: 1px solid #9caaba;
+    -webkit-box-shadow: inset 0 1px 0 0 #f2f2f2;
+    -moz-box-shadow: inset 0 1px 0 0 #f2f2f2;
+    -ms-box-shadow: inset 0 1px 0 0 #f2f2f2;
+    -o-box-shadow: inset 0 1px 0 0 #f2f2f2;
+    box-shadow: inset 0 1px 0 0 #f2f2f2;
+    color: #163659;
+    cursor: pointer; }
+  &:active {
+    border: 1px solid #8c98a7;
+    -webkit-box-shadow: inset 0 0 4px 2px #abbccf, 0 0 1px 0 #eeeeee;
+    -moz-box-shadow: inset 0 0 4px 2px #abbccf, 0 0 1px 0 #eeeeee;
+    -ms-box-shadow: inset 0 0 4px 2px #abbccf, 0 0 1px 0 #eeeeee;
+    -o-box-shadow: inset 0 0 4px 2px #abbccf, 0 0 1px 0 #eeeeee;
+    box-shadow: inset 0 0 4px 2px #abbccf, 0 0 1px 0 #eeeeee; }
+}
+
+#icon-wp-app-store {
+    background: url("../../../../../wp-admin/images/icons32.png?ver=20100531") no-repeat scroll -370px -5px transparent;
+}
+
+#wp-app-store {
+    > .header {
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 8px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        
+        h2 {
+            float: left;
+        }
+        
+        .login {
+            float: right;
+            font-size: 14px;
+            margin-top: 1.2em;
+            text-decoration: none;
+        }
+    }
+    
+    .section-title {
+        margin-bottom: 15px;
+        
+        h3 {
+            display: inline;
+            font-size: 1.4em;
+            font-weight: normal;
+            margin-top: 0;
+        }
+    }
+    
+    .product-grid {
+        overflow: hidden;
+        
+        .product {
+            width: 31%;
+            margin: 0 3% 2% 0;
+            display: block;
+            text-decoration: none;
+            float: left;
+            
+            &.last-col {
+                margin-right: 0;
+            }
+            
+            img {
+                width: 100%;
+                display: block;
+                margin-bottom: 0.8em;
+                border: 1px solid #ccc;
+            }
+            
+            h4 {
+                font-size: 1.4em;
+                margin: 0;
+                display: inline;
+                color: #333;
+            }
+            
+            .publisher {
+                display: inline;
+                margin: 0;
+                color: #999;
+                white-space: nowrap;
+                font-size: 1.1em;
+            }
+            
+            .caption {
+                margin-left: 0.5em;
+            }
+            
+            &:hover {
+                h4 {
+                    color: #666;
+                }
+            }
+        }
+    }
+    
+    .home {
+        .product-grid.themes {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+        }
+        
+        .section-title {
+            a {
+                text-decoration: none;
+                color: #999;
+                margin-left: 0.5em;
+                
+                &:hover {
+                    color: #666;
+                }
+            }
+        }
+    }
+    
+    .product.single {
+        .sidebar {
+            float: left;
+            width: 30%;
+        }
+            
+        .featured-image {
+            display: block;
+            width: 100%;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
+        
+        .buy {
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+        
+        .buy-button {
+            @include cupid-green;
+            display: block;
+            float: right;
+        }
+        
+        .price {
+            float: left;
+            width: 26%;
+            font-size: 3em;
+            font-style: italic;
+            color: #777;
+            line-height: 1.3em;
+            padding-right: 1%;
+            font-family: "Georgia", serif;
+        }
+        
+        .links {
+            margin-bottom: 2em;
+            border-top: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+            padding: 1.8em 0;
+            
+            li {
+                display: inline;
+                margin-right: 2%;
+                font-size: 1.2em;
+            }
+            
+            a {
+                background: url(../img/icon-external-link.gif) center right no-repeat;
+                padding-right: 17px;
+                @include cupid-blue;
+            }
+        }
+        
+        .info, .requirements {
+            font-size: 1.1em;
+        }
+        
+        .more {
+            text-decoration: none;
+        }
+        
+        .screenshots {
+            
+            ul {
+                overflow: hidden;
+                margin: 0;
+            }
+            
+            li {
+                float: left;
+                width: 23.5%;
+                margin: 0 2% 2% 0;
+            }
+            
+            .last-col {
+                margin-right: 0;
+            }
+            
+            img {
+                display: block;
+                width: 100%;
+                border: 1px solid #ccc;
+            }
+            
+        }
+        
+        .main {
+            float: right;
+            width: 68%;
+            
+            > h2 {
+                padding: 0;
+                display: inline;
+                color: #333;
+            }
+            
+            > .publishers {
+                display: inline;
+                margin: 0 0 0 0.5em;
+                color: #999;
+                white-space: nowrap;
+                font-size: 1.1em;
+            }
+            
+            .copy {
+                font-size: 1.2em;
+                line-height: 1.4em;
+                padding-bottom: 0.5em;
+            }
+        }
+    }
+    
+    .paging {
+        text-align: center;
+        padding-top: 20px;
+        
+        a {
+            font-size: 1.1em;
+            border: 1px solid #ccc;
+            padding: 0.3em 0.5em 0.2em 0.5em;
+            margin-right: 0.5em;
+            text-decoration: none;
+            line-height: 1em;
+            color: #666;
+            
+            &:hover, .current {
+                color: #333;
+                border-color: #999;
+            }
+        }
+        
+        .dots {
+            margin-right: 0.5em;
+        }
+        
+        .current {
+            font-weight: bold;
+        }
+    }
+    
+    .archive {
+        .section-title {
+            span {
+                color: #999;
+                margin-left: 0.5em;
+            }
+        }
+    }
+}
+
+@media screen and (min-width: 1024px) {
+    #wp-app-store {
+        .product.single {
+            .main {
+                /*
+                .copy .expandable {
+                    -moz-column-count: 2;
+                    -moz-column-gap: 40px;
+                    -webkit-column-count: 2;
+                    -webkit-column-gap: 40px;
+                    column-count: 2;
+                    column-gap: 40px;
+                }
+                */
+            }
+        }
+    }
+}
