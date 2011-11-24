@@ -1,3 +1,5 @@
+$Georgia: Georgia,"Times New Roman","Bitstream Charter",Times,serif;
+
 @mixin cupid-green {
   background-color: #7fbf4d;
   background-image: -webkit-gradient(linear, left top, left bottom, from(#7fbf4d), to(#63a62f));
@@ -9,17 +11,17 @@
   background-image: linear-gradient(top, #7fbf4d, #63a62f);
   border: 1px solid #63a62f;
   border-bottom: 1px solid #5b992b;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  -ms-border-radius: 3px;
-  -o-border-radius: 3px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
   border-radius: 5px;
   -webkit-box-shadow: inset 0 1px 0 0 #96ca6d;
   -moz-box-shadow: inset 0 1px 0 0 #96ca6d;
   -ms-box-shadow: inset 0 1px 0 0 #96ca6d;
   -o-box-shadow: inset 0 1px 0 0 #96ca6d;
   box-shadow: inset 0 1px 0 0 #96ca6d;
-  color: #BAF0B4;
+  color: #D7FFD7;
   line-height: 1.5;
   padding: 10px 0 8px 0;
   text-align: center;
@@ -32,6 +34,7 @@
   text-transform: uppercase;
   
   &:hover {
+    color: #BAF0B4;
     background-color: #76b347;
     background-image: -webkit-gradient(linear, left top, left bottom, from(#76b347), to(#5e9e2e));
     /* Saf4+, Chrome */
@@ -116,8 +119,24 @@
     box-shadow: inset 0 0 4px 2px #abbccf, 0 0 1px 0 #eeeeee; }
 }
 
+#toplevel_page_wp-app-store {
+    .wp-menu-image {
+        background: url("../img/wpas-icon.png") no-repeat 6px -27px;
+    }
+    
+    &.wp-menu-open, &:hover {
+        .wp-menu-image {
+            background-position: 6px 3px;
+        }
+    }
+    
+    img {
+        display: none;
+    }
+}
+
 #icon-wp-app-store {
-    background: url("../../../../../wp-admin/images/icons32.png?ver=20100531") no-repeat scroll -370px -5px transparent;
+    background: url("../img/wpas-icon-32.png") no-repeat;
 }
 
 #wp-app-store {
@@ -129,14 +148,32 @@
         
         h2 {
             float: left;
+            font-family: $Georgia;
         }
-        
-        .login {
-            float: right;
-            font-size: 14px;
-            margin-top: 1.2em;
+            
+        a {
             text-decoration: none;
         }
+        
+        .actions {
+            float: right;
+            color: #999;
+            font-size: 14px;
+            margin-top: 1.2em;
+        }
+        
+        .sep {
+            margin: 0 0.5em;
+            color: #ccc;
+        }
+    }
+    
+    a:focus {
+        color: #21759B;
+    }
+    
+    a:hover {
+        color: #D54E21;
     }
     
     .section-title {
@@ -151,15 +188,15 @@
     }
     
     .product-grid {
-        overflow: hidden;
         
         .product {
-            width: 31%;
-            margin: 0 3% 2% 0;
+            width: 32%;
+            margin: 0 2% 2% 0;
             display: block;
             text-decoration: none;
             float: left;
             
+            &:nth-of-type(3n),
             &.last-col {
                 margin-right: 0;
             }
@@ -199,20 +236,50 @@
     }
     
     .home {
-        .product-grid.themes {
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ccc;
+        overflow: hidden;
+        
+        .product-grid {
+            width: 46.5%;
+            padding-bottom: 200px;
+
+            .product {
+                width: 48.5%;
+                margin: 0 0 3% 0;
+
+                &:nth-of-type(2n),
+                &.last-col {
+                    float: right;
+                }
+            }
         }
         
-        .section-title {
-            a {
-                text-decoration: none;
-                color: #999;
-                margin-left: 0.5em;
-                
-                &:hover {
-                    color: #666;
-                }
+        .product-grid.themes {
+            float: left;
+        }
+        
+        .product-grid.plugins {
+            float: right;
+        }
+        
+        .grid-sep {
+            float: left;
+            width: 4%;
+            height: 1000px;
+            margin: 0 1.5%;
+            background: url(../img/grid-sep.png);
+        }
+        
+        .more-link {
+            clear: both;
+        }
+        
+        .more {
+            text-decoration: none;
+            color: #999;
+            margin-left: 0.5em;
+            
+            &:hover {
+                color: #666;
             }
         }
     }
@@ -230,12 +297,12 @@
             margin-bottom: 20px;
         }
         
-        .buy {
+        .install {
             overflow: hidden;
             margin-bottom: 40px;
         }
         
-        .buy-button {
+        .install-button {
             @include cupid-green;
             display: block;
             float: right;
@@ -256,18 +323,32 @@
             margin-bottom: 2em;
             border-top: 1px solid #ccc;
             border-bottom: 1px solid #ccc;
-            padding: 1.8em 0;
+            padding: 1em 0;
             
             li {
                 display: inline;
                 margin-right: 2%;
-                font-size: 1.2em;
+                border-right: 1px solid #ccc;
+                padding-right: 2%;
+            }
+            
+            li:last-of-type {
+                border: 0;
             }
             
             a {
-                background: url(../img/icon-external-link.gif) center right no-repeat;
-                padding-right: 17px;
-                @include cupid-blue;
+                text-decoration: none;
+                font-size: 1.1em;
+                /*
+                border: 1px solid #ccc;
+                padding: 0.6em 1em 0.5em 1em;
+                border-radius: 15px;
+                */
+            
+                span {
+                    background: url(../img/icon-external-link.gif) right top no-repeat;
+                    padding-right: 17px;
+                }
             }
         }
         
@@ -277,6 +358,12 @@
         
         .more {
             text-decoration: none;
+            
+            span {
+                font-size: 0.7em;
+                position: relative;
+                top: -0.1em;
+            }
         }
         
         .screenshots {
@@ -288,10 +375,11 @@
             
             li {
                 float: left;
-                width: 23.5%;
-                margin: 0 2% 2% 0;
+                width: 18.8%;
+                margin: 0 1.4% 1.4% 0;
             }
             
+            &:nth-of-type(5n),
             .last-col {
                 margin-right: 0;
             }
@@ -333,6 +421,7 @@
     .paging {
         text-align: center;
         padding-top: 20px;
+        clear: both;
         
         a {
             font-size: 1.1em;
@@ -364,6 +453,36 @@
                 color: #999;
                 margin-left: 0.5em;
             }
+        }
+        
+        .product-grid {
+            float: left;
+            width: 83%;
+        }
+        
+        .sidebar {
+            float: right;
+            width: 15%;
+            background-color: #eee;
+            height: 1000px;
+        }
+    }
+    
+    .installing {
+        .featured-image {
+            width: 30%;
+            float: left;
+            border: 1px solid #ccc;
+        }
+        
+        .details {
+            width: 65%;
+            float: left;
+            margin-left: 2%;
+        }
+        
+        p {
+            font-size: 1.1em;
         }
     }
 }

@@ -27,7 +27,11 @@
         endif;
         ?>
         
+        <p class="more-link"><a href="<?php echo $this->wpas->themes_url; ?>" class="more"><?php _e( 'more themes &#8594;', 'wp-app-store' ); ?></a></p>
+        
     </div>
+    
+    <div class="grid-sep"></div>
     
     <div class="product-grid plugins">
 
@@ -53,6 +57,8 @@
 
         endif;
         ?>
+
+        <p class="more-link"><a href="<?php echo $this->wpas->plugins_url; ?>" class="more"><?php _e( 'more plugins &#8594;', 'wp-app-store' ); ?></a></p>
         
     </div>
         

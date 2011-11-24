@@ -2,14 +2,15 @@
 
 <div class="header">
     <?php screen_icon(); ?>
-    <h2><?php _e( 'App Store', 'wp-app-store' ); ?></h2>
+    <h2><?php echo $this->wpas->title; ?></h2>
     <div class="breadcrumbs">
         <?php
+        /*
         $crumbs = array();
         switch ( $_GET['page'] ) {
             case 'wp-app-store':
                 
-                if ( 'view_product' == $_GET['wpas-action'] ) {
+                if ( isset( $_GET['wpas-action'] ) && 'view_product' == $_GET['wpas-action'] ) {
                     if ( 'theme' == $_GET['wpas-ptype'] ) {
                         $crumbs[] = '<a href="">' . __( 'Themes', 'wp-app-store' ) . '</a>';
                     }
@@ -20,9 +21,21 @@
                 
             break;
         }
+        */
         ?>
     </div>    
     <div class="actions">
-        <a href="" class="login">Login or Register</a>
+        <?php if ( $this->wpas->user ) : $user = $this->wpas->user; ?>
+        Logged in as <strong><?php echo $user->fname . ' ' . $user->lname; ?></strong>
+        <span class="sep">|</span>
+        <a href="<?php echo $this->wpas->purchases_url; ?>" class="purchases">Purchases</a>
+        <span class="sep">|</span>
+        <a href="<?php echo $this->wpas->edit_profile_url; ?>" class="purchases">Edit Profile</a>
+        <span class="sep">|</span>
+        <a href="<?php echo $this->wpas->store_logout_url; ?>" class="logout">Logout</a>
+        <?php else : ?>
+        <a href="<?php echo $this->wpas->store_login_url; ?>" class="login">Sign in</a>
+        or <a href="<?php echo $this->wpas->register_url; ?>" class="login">Create an account</a>
+        <?php endif; ?>
     </div>
 </div>

@@ -5,9 +5,23 @@
     <div class="sidebar">
         <img class="featured-image" src="<?php echo $product->image->src; ?>" alt="<?php echo esc_attr( $product->title ); ?>" />
         
-        <div class="buy">
-            <a href="" class="buy-button"><?php _e( 'Buy &amp; Install', 'wp-app-store' ); ?></a>
-            <div class="price">$<?php echo number_format( $product->price ); ?></div>
+        <?php
+        if ( $product->price ) {
+            $url = $this->wpas->get_buy_url( $product );
+            $button_txt = __( 'Buy &amp; Install', 'wp-app-store' );
+            $price = '$' . number_format( $product->price );
+            $css_class = 'buy';
+        }
+        else {
+            $url = $this->wpas->get_install_url( $product );
+            $button_txt = __( 'Install', 'wp-app-store' );
+            $price = __( 'Free', 'wp-app-store' );
+            $css_class = '';
+        }
+        ?>
+        <div class="install <?php echo $css_class; ?>">
+            <a href="<?php echo $url; ?>" class="install-button"><?php echo $button_txt; ?></a>
+            <div class="price"><?php echo $price; ?></div>
         </div>
         
         <ul class="info">
@@ -60,7 +74,7 @@
             foreach ( $product->links as $link ) :
                 ?>
                 
-                <li><a href="<?php echo $link->url; ?>" target="_blank"><?php echo $link->title; ?> <img src="<?php echo $this->wpas->img_url; ?>/icon-external-link.gif" alt="" /></a></li>
+                <li><a href="<?php echo $link->url; ?>" target="_blank"><span><?php echo $link->title; ?></span></a></li>
                 
                 <?php
             endforeach;

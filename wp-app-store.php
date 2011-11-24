@@ -9,7 +9,7 @@ Version: 1.0
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
 
-require( 'lib/wp-app-store.php' );
+require 'lib/wp-app-store.php' ;
 
 global $wp_app_store;
 $wp_app_store = new WP_App_Store( __FILE__ );
