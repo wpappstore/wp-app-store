@@ -44,7 +44,7 @@ class WPAS_View {
         $content = $product->description;
         if ( preg_match('/<!--more(.*?)?-->/', $content, $matches) ) {
             $content = explode($matches[0], $content, 2);
-            $content = force_balance_tags($content[0]) . "\n<div class=\"expandable\">\n" . force_balance_tags($content[1]) . "</div>\n";
+            $content = force_balance_tags($content[0]) . "\n<div class=\"expandable\" style=\"display: none;\">\n" . force_balance_tags($content[1]) . "</div>\n";
         }
         return wpautop( $content );
     }

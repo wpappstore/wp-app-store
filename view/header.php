@@ -39,3 +39,5 @@
         <?php endif; ?>
     </div>
 </div>
+
+<div class="content-wrapper">

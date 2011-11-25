@@ -31,7 +31,7 @@ class WP_App_Store {
         $this->img_url = $this->asset_url . '/img';
         $this->js_url = $this->asset_url . '/js';
         
-        $this->admin_url = get_bloginfo('url') . '/wp-admin/admin.php';
+        $this->admin_url = admin_url( 'admin.php' );
         $this->home_url = $this->admin_url . '?page=' . $this->slug;
         $this->themes_url = $this->admin_url . '?page=' . $this->slug . '-themes';
         $this->plugins_url = $this->admin_url . '?page=' . $this->slug . '-plugins';
@@ -45,7 +45,7 @@ class WP_App_Store {
 
         $this->view = new WPAS_View( $this );
         
-        $this->store_url = 'http://getwpas.com';
+        $this->store_url = 'http://dev.getwpas.com';
         $this->api_url = $this->store_url . '/api';
         $this->store_login_url = $this->store_url . '/p/login/?wpas-redirect=' . urlencode( $this->login_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
         $this->store_logout_url = $this->store_url . '/p/logout/?wpas-redirect=' . urlencode( $this->logout_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
@@ -123,12 +123,16 @@ class WP_App_Store {
     function enqueue_styles() {
         //if ( !isset( $_GET['page'] ) || !preg_match( '@^' . $this->slug . '@', $_GET['page'] ) ) return;
         wp_enqueue_style( $this->slug, $this->css_url . '/styles.css' );
+        wp_enqueue_style( 'prettyPhoto', $this->css_url . '/prettyPhoto.css' );
+        add_thickbox();
+        wp_enqueue_script( 'theme-preview' );
+        wp_enqueue_script( 'theme' );
     }
     
     function enqueue_scripts() {
         if ( !isset( $_GET['page'] ) || !preg_match( '@^' . $this->slug . '@', $_GET['page'] ) ) return;
         wp_enqueue_script( $this->slug, $this->js_url . '/script.js', array( 'jquery' ) );
-        add_thickbox();
+        wp_enqueue_script( 'prettyPhoto', $this->js_url . '/jquery.prettyPhoto.js', array( 'jquery' ) );
     }
     
     function api_request( $url ) {
@@ -243,10 +247,6 @@ class WP_App_Store {
         require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
         
         if ( $ptype == 'theme' ) {
-            add_thickbox();
-            wp_enqueue_script( 'theme-preview' );
-            wp_enqueue_script( 'theme' );
-    
             require_once ABSPATH . 'wp-admin/includes/theme-install.php';
             
             require_once 'theme-upgrader-skin.php';

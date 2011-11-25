@@ -139,12 +139,13 @@ $Georgia: Georgia,"Times New Roman","Bitstream Charter",Times,serif;
     background: url("../img/wpas-icon-32.png") no-repeat;
 }
 
+p, ul, ol, blockquote, input, select { font-size: inherit; }
+body, td, textarea, input, select { font-size: 12px; }
+
 #wp-app-store {
     > .header {
-        border-bottom: 1px solid #ccc;
-        padding-bottom: 8px;
+        margin-bottom: 8px;
         overflow: hidden;
-        margin-bottom: 20px;
         
         h2 {
             float: left;
@@ -166,6 +167,13 @@ $Georgia: Georgia,"Times New Roman","Bitstream Charter",Times,serif;
             margin: 0 0.5em;
             color: #ccc;
         }
+    }
+    
+    .content-wrapper {
+        overflow: hidden;
+        clear: both;
+        border-top: 1px solid #ccc;
+        padding-top: 20px;
     }
     
     a:focus {
@@ -203,6 +211,7 @@ $Georgia: Georgia,"Times New Roman","Bitstream Charter",Times,serif;
             
             img {
                 width: 100%;
+                height: auto;
                 display: block;
                 margin-bottom: 0.8em;
                 border: 1px solid #ccc;
@@ -320,7 +329,7 @@ $Georgia: Georgia,"Times New Roman","Bitstream Charter",Times,serif;
         }
         
         .links {
-            margin-bottom: 2em;
+            margin: 1em 0 2em 0;
             border-top: 1px solid #ccc;
             border-bottom: 1px solid #ccc;
             padding: 1em 0;

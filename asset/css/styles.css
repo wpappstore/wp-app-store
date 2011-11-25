@@ -8,11 +8,15 @@
 #icon-wp-app-store {
   background: url("../img/wpas-icon-32.png") no-repeat; }
 
+p, ul, ol, blockquote, input, select {
+  font-size: inherit; }
+
+body, td, textarea, input, select {
+  font-size: 12px; }
+
 #wp-app-store > .header {
-  border-bottom: 1px solid #ccc;
-  padding-bottom: 8px;
-  overflow: hidden;
-  margin-bottom: 20px; }
+  margin-bottom: 8px;
+  overflow: hidden; }
   #wp-app-store > .header h2 {
     float: left;
     font-family: Georgia, "Times New Roman", "Bitstream Charter", Times, serif; }
@@ -26,6 +30,11 @@
   #wp-app-store > .header .sep {
     margin: 0 0.5em;
     color: #ccc; }
+#wp-app-store .content-wrapper {
+  overflow: hidden;
+  clear: both;
+  border-top: 1px solid #ccc;
+  padding-top: 20px; }
 #wp-app-store a:focus {
   color: #21759B; }
 #wp-app-store a:hover {
@@ -47,6 +56,7 @@
     margin-right: 0; }
   #wp-app-store .product-grid .product img {
     width: 100%;
+    height: auto;
     display: block;
     margin-bottom: 0.8em;
     border: 1px solid #ccc; }
@@ -172,7 +182,7 @@
   padding-right: 1%;
   font-family: "Georgia", serif; }
 #wp-app-store .product.single .links {
-  margin-bottom: 2em;
+  margin: 1em 0 2em 0;
   border-top: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
   padding: 1em 0; }

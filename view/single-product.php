@@ -99,7 +99,7 @@
                     ?>
                     
                     <li>
-                        <a href="<?php echo $screenshot->large->src; ?>" target="_blank" class="thickbox" rel="product-screenshots">
+                        <a href="<?php echo $screenshot->large->src; ?>" target="_blank" rel="prettyPhoto[product-screenshots]" title="">
                             <img src="<?php echo $screenshot->thumb->src; ?>" alt="" />
                         </a>
                     </li>

@@ -44,6 +44,11 @@
             popup_window($(this).attr('href'), 'wpas-popup', 675, 360, e);
             return false;
         });
+        
+        $("a[rel^='prettyPhoto[product-screenshots]']").prettyPhoto({
+            show_title: true,
+            social_tools: ''
+        });
     });
     
     function popup_window( url, name, width, height, e ) {
