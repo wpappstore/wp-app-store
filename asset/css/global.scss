@@ -1,0 +1,15 @@
+#toplevel_page_wp-app-store {
+    .wp-menu-image {
+        background: url("../img/wpas-icon.png") no-repeat 6px -27px;
+    }
+    
+    &.wp-menu-open, &:hover {
+        .wp-menu-image {
+            background-position: 6px 3px;
+        }
+    }
+    
+    img {
+        display: none;
+    }
+}

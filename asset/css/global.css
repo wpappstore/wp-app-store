@@ -1,0 +1,6 @@
+#toplevel_page_wp-app-store .wp-menu-image {
+  background: url("../img/wpas-icon.png") no-repeat 6px -27px; }
+#toplevel_page_wp-app-store.wp-menu-open .wp-menu-image, #toplevel_page_wp-app-store:hover .wp-menu-image {
+  background-position: 6px 3px; }
+#toplevel_page_wp-app-store img {
+  display: none; }

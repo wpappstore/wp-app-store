@@ -121,7 +121,8 @@ class WP_App_Store {
     }
     
     function enqueue_styles() {
-        //if ( !isset( $_GET['page'] ) || !preg_match( '@^' . $this->slug . '@', $_GET['page'] ) ) return;
+        wp_enqueue_style( $this->slug . '-global', $this->css_url . '/global.css' );
+        if ( !isset( $_GET['page'] ) || !preg_match( '@^' . $this->slug . '@', $_GET['page'] ) ) return;
         wp_enqueue_style( $this->slug, $this->css_url . '/styles.css' );
         wp_enqueue_style( 'prettyPhoto', $this->css_url . '/prettyPhoto.css' );
         add_thickbox();
