@@ -187,6 +187,7 @@ body, td, textarea, input, select { font-size: 12px; }
             display: block;
             text-decoration: none;
             float: left;
+            border: 1px solid #ccc;
             
             &:nth-of-type(3n),
             &.last-col {
@@ -198,7 +199,6 @@ body, td, textarea, input, select { font-size: 12px; }
                 height: auto;
                 display: block;
                 margin-bottom: 0.8em;
-                border: 1px solid #ccc;
             }
             
             h4 {

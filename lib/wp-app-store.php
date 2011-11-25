@@ -45,7 +45,7 @@ class WP_App_Store {
 
         $this->view = new WPAS_View( $this );
         
-        $this->store_url = 'http://dev.getwpas.com';
+        $this->store_url = 'http://getwpas.com';
         $this->api_url = $this->store_url . '/api';
         $this->store_login_url = $this->store_url . '/p/login/?wpas-redirect=' . urlencode( $this->login_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
         $this->store_logout_url = $this->store_url . '/p/logout/?wpas-redirect=' . urlencode( $this->logout_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );

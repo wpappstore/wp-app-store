@@ -44,15 +44,15 @@ body, td, textarea, input, select {
   margin: 0 2% 2% 0;
   display: block;
   text-decoration: none;
-  float: left; }
+  float: left;
+  border: 1px solid #ccc; }
   #wp-app-store .product-grid .product:nth-of-type(3n), #wp-app-store .product-grid .product.last-col {
     margin-right: 0; }
   #wp-app-store .product-grid .product img {
     width: 100%;
     height: auto;
     display: block;
-    margin-bottom: 0.8em;
-    border: 1px solid #ccc; }
+    margin-bottom: 0.8em; }
   #wp-app-store .product-grid .product h4 {
     font-size: 1.4em;
     margin: 0;
