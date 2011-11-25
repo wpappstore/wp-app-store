@@ -119,22 +119,6 @@ $Georgia: Georgia,"Times New Roman","Bitstream Charter",Times,serif;
     box-shadow: inset 0 0 4px 2px #abbccf, 0 0 1px 0 #eeeeee; }
 }
 
-#toplevel_page_wp-app-store {
-    .wp-menu-image {
-        background: url("../img/wpas-icon.png") no-repeat 6px -27px;
-    }
-    
-    &.wp-menu-open, &:hover {
-        .wp-menu-image {
-            background-position: 6px 3px;
-        }
-    }
-    
-    img {
-        display: none;
-    }
-}
-
 #icon-wp-app-store {
     background: url("../img/wpas-icon-32.png") no-repeat;
 }
