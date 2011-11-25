@@ -187,18 +187,21 @@ body, td, textarea, input, select { font-size: 12px; }
             display: block;
             text-decoration: none;
             float: left;
-            border: 1px solid #ccc;
             
             &:nth-of-type(3n),
             &.last-col {
                 margin-right: 0;
             }
             
+            .screenshot {
+                border: 1px solid #ccc;
+                margin-bottom: 0.8em;
+            }
+            
             img {
                 width: 100%;
                 height: auto;
                 display: block;
-                margin-bottom: 0.8em;
             }
             
             h4 {
