@@ -27,7 +27,7 @@ body, td, textarea, input, select {
   overflow: hidden;
   clear: both;
   border-top: 1px solid #ccc;
-  padding-top: 20px; }
+  padding: 20px 0; }
 #wp-app-store a:focus {
   color: #21759B; }
 #wp-app-store a:hover {
@@ -58,7 +58,8 @@ body, td, textarea, input, select {
     font-size: 1.4em;
     margin: 0;
     display: inline;
-    color: #333; }
+    color: #333;
+    font-weight: normal; }
   #wp-app-store .product-grid .product .publisher {
     display: inline;
     margin: 0;
@@ -166,6 +167,14 @@ body, td, textarea, input, select {
     -ms-box-shadow: inset 0 0 8px 4px #548c29, 0 1px 0 0 #eeeeee;
     -o-box-shadow: inset 0 0 8px 4px #548c29, 0 1px 0 0 #eeeeee;
     box-shadow: inset 0 0 8px 4px #548c29, 0 1px 0 0 #eeeeee; }
+#wp-app-store .product.single .installed-msg {
+  float: right;
+  width: 70%;
+  text-align: right; }
+#wp-app-store .product.single .note {
+  clear: both;
+  text-align: right;
+  padding-top: 0.5em; }
 #wp-app-store .product.single .price {
   float: left;
   width: 26%;
@@ -277,6 +286,54 @@ body, td, textarea, input, select {
   margin-left: 2%; }
 #wp-app-store .installing p {
   font-size: 1.1em; }
+#wp-app-store .purchases .section-title {
+  margin-bottom: 0; }
+#wp-app-store .purchases .listing {
+  min-width: 800px; }
+  #wp-app-store .purchases .listing .product {
+    border-bottom: 1px solid #ccc;
+    padding: 20px 0;
+    overflow: hidden; }
+    #wp-app-store .purchases .listing .product p {
+      margin: 0 0 0.5em 0;
+      line-height: 1em; }
+    #wp-app-store .purchases .listing .product .button:hover {
+      color: #000; }
+    #wp-app-store .purchases .listing .product .button-wrap {
+      padding-top: 0.2em; }
+  #wp-app-store .purchases .listing .screenshot {
+    display: block;
+    width: 10%;
+    border: 1px solid #ccc;
+    float: left; }
+    #wp-app-store .purchases .listing .screenshot img {
+      display: block;
+      width: 100%;
+      height: auto; }
+  #wp-app-store .purchases .listing .details {
+    float: left;
+    width: 30%;
+    margin: 2px 0 0 2%; }
+    #wp-app-store .purchases .listing .details h4 {
+      font-size: 1.6em;
+      font-weight: normal;
+      margin: 0 0 0.2em 0; }
+    #wp-app-store .purchases .listing .details p {
+      margin: 0;
+      color: #999; }
+    #wp-app-store .purchases .listing .details .publisher {
+      font-size: 1.2em;
+      margin-bottom: 0.8em; }
+  #wp-app-store .purchases .listing .status {
+    float: left;
+    margin: 10px 0 0 0;
+    width: 35%;
+    text-align: right; }
+  #wp-app-store .purchases .listing .cost {
+    float: left;
+    margin: 10px 0 0 0;
+    width: 22%;
+    text-align: right; }
 
 @media screen and (min-width: 1024px) {
   #wp-app-store .product.single .main {

@@ -35,12 +35,10 @@
             });
         });
         
-        $('#wp-app-store > .header .login, #wp-app-store > .header .logout').click(function(e) {
-            popup_window($(this).attr('href'), 'wpas-popup', 675, 360, e);
-            return false;
-        });
-
-        $('#wp-app-store .install.buy .install-button').click(function(e) {
+        $('#wp-app-store .install.buy .install-button,\
+          #wp-app-store > .header .login,\
+          #wp-app-store > .header .logout,\
+          #wp-app-store > .header .edit-profile').click(function(e) {
             popup_window($(this).attr('href'), 'wpas-popup', 675, 360, e);
             return false;
         });
@@ -54,7 +52,7 @@
     function popup_window( url, name, width, height, e ) {
         var top = window.screenY + ($(window).height() / 2) - (height / 2),
             left = window.screenX + ($(window).width() / 2) - (width / 2);
-        var p = window.open(url, name, 'width=' + width + ',height=' + height + ',scrollbars=1,top=' + top + ',left=' + left);
+        var p = window.open(url, name, 'width=' + width + ',height=' + height + ',location=1,scrollbars=1,top=' + top + ',left=' + left);
         p.focus();
     }
 

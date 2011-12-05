@@ -157,7 +157,7 @@ body, td, textarea, input, select { font-size: 12px; }
         overflow: hidden;
         clear: both;
         border-top: 1px solid #ccc;
-        padding-top: 20px;
+        padding: 20px 0;
     }
     
     a:focus {
@@ -209,6 +209,7 @@ body, td, textarea, input, select { font-size: 12px; }
                 margin: 0;
                 display: inline;
                 color: #333;
+                font-weight: normal;
             }
             
             .publisher {
@@ -302,6 +303,18 @@ body, td, textarea, input, select { font-size: 12px; }
             @include cupid-green;
             display: block;
             float: right;
+        }
+        
+        .installed-msg {
+            float: right;
+            width: 70%;
+            text-align: right;
+        }
+        
+        .note {
+            clear: both;
+            text-align: right;
+            padding-top: 0.5em;
         }
         
         .price {
@@ -479,6 +492,87 @@ body, td, textarea, input, select { font-size: 12px; }
         
         p {
             font-size: 1.1em;
+        }
+    }
+    
+    .purchases {
+        .section-title {
+            margin-bottom: 0;
+        }
+        
+        .listing {
+            min-width: 800px;
+            
+            .product {
+                border-bottom: 1px solid #ccc;
+                padding: 20px 0;
+                overflow: hidden;
+                
+                p {
+                    margin: 0 0 0.5em 0;
+                    line-height: 1em;
+                }
+                
+                .button:hover {
+                    color: #000;
+                }
+                
+                .button-wrap {
+                    padding-top: 0.2em;
+                }
+            }
+            
+            .screenshot {
+                display: block;
+                width: 10%;
+                border: 1px solid #ccc;
+                float: left;
+                
+                img {
+                    display: block;
+                    width: 100%;
+                    height: auto;
+                }
+            }
+            
+            .details {
+                float: left;
+                width: 30%;
+                margin: 2px 0 0 2%;
+                
+                h4 {
+                    font-size: 1.6em;
+                    font-weight: normal;
+                    margin: 0 0 0.2em 0;
+                }
+                
+                p {
+                    margin: 0;
+                    color: #999;
+                }
+                
+                .publisher {
+                    font-size: 1.2em;
+                    margin-bottom: 0.8em;
+                }
+                
+                .date {
+                }
+            }
+            
+            .status {
+                float: left;
+                margin: 10px 0 0 0;
+                width: 35%;
+                text-align: right;
+            }
+            
+            .cost {
+                float: left;
+                margin: 10px 0 0 0;
+                width: 22%;
+                text-align: right;
+            }
         }
     }
 }

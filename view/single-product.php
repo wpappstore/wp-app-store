@@ -6,22 +6,51 @@
         <img class="featured-image" src="<?php echo $product->image->src; ?>" alt="<?php echo esc_attr( $product->title ); ?>" />
         
         <?php
-        if ( $product->price ) {
-            $url = $this->wpas->get_buy_url( $product );
-            $button_txt = __( 'Buy &amp; Install', 'wp-app-store' );
-            $price = '$' . number_format( $product->price );
-            $css_class = 'buy';
-        }
-        else {
+        $css_class = '';
+        
+        $price = ( $product->price ) ? $product->price : 0;
+        $price = '$' . number_format( $price );
+        
+        if ( $is_purchased ) {
             $url = $this->wpas->get_install_url( $product );
             $button_txt = __( 'Install', 'wp-app-store' );
-            $price = __( 'Free', 'wp-app-store' );
-            $css_class = '';
+        }
+        else {
+            $url = $this->wpas->get_buy_url( $product );
+            $button_txt = __( 'Buy &amp; Install', 'wp-app-store' );
+            $css_class = 'buy';
+        }
+        
+        if ( $product->product_type == 'theme' ) {
+            $installed_url = '<a class="more" href="' . self_admin_url('themes.php') . '">' . __( 'View installed themes &#8594;', 'wp-app-store' ) . '</a>';
+        }
+        else {
+            $installed_url = '<a class="more" href="' . self_admin_url('plugins.php') . '">' . __( 'View installed plugins &#8594;', 'wp-app-store' ) . '</a>';
         }
         ?>
         <div class="install <?php echo $css_class; ?>">
-            <a href="<?php echo $url; ?>" class="install-button"><?php echo $button_txt; ?></a>
-            <div class="price"><?php echo $price; ?></div>
+            <?php if ( $installed_version = $this->product_installed_version() ) : ?>
+                <div class="installed-msg">
+                    <?php if ( $is_purchased ) : ?>
+                        <?php printf( __( 'This %s is already installed.', 'wp-app-store' ), $product->product_type ); ?><br />
+                        <?php echo $installed_url; ?><br />
+                        <a class="more" href="<?php echo $this->wpas->purchases_url; ?>"><?php _e( 'Review your purchases &#8594;', 'wp-app-store' ); ?></a>
+                    <?php else : ?>
+                        <?php printf( __( 'This %s is already installed but was not purchased through this store.', 'wp-app-store' ), $product->product_type ); ?><br />
+                        <?php echo $installed_url; ?><br />
+                    <?php endif; ?>
+                </div>
+                <div class="price"><?php echo $price; ?></div>
+            <?php else : ?>
+                <a href="<?php echo $url; ?>" class="install-button"><?php echo $button_txt; ?></a>
+                <div class="price"><?php echo $price; ?></div>
+                <?php if ( $is_purchased ) : ?>
+                <div class="note">
+                    <?php printf( __( 'You have already purchased this %s.', 'wp-app-store' ), $product->product_type ); ?><br />
+                    <a class="more" href="<?php echo $this->wpas->purchases_url; ?>"><?php _e( 'Review your purchases &#8594;', 'wp-app-store' ); ?></a>
+                </div>
+                <?php endif; ?>
+            <?php endif; ?>
         </div>
         
         <ul class="info">
@@ -57,7 +86,7 @@
     </div>
     
     <div class="main">
-        <h2><?php echo $product->title; ?></h2>
+        <h2><?php echo ucfirst($product->product_type); ?>: <?php echo $product->title; ?></h2>
         <p class="publishers">by <?php echo $this->publisher_list(); ?></p>
         
         <div class="copy">

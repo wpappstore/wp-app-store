@@ -10,21 +10,13 @@
     <div class="product-grid">
   
         <?php
-        if ( is_wp_error( $themes ) ) :
-        
-            echo $themes->get_error_message();
+        global $product;
+
+        foreach ( $items as $product ) :
+
+            $this->render_part( 'product-item' );
             
-        else :
-        
-            global $product;
-
-            foreach ( $items as $product ) :
-
-                $this->render_part( 'product-item' );
-                
-            endforeach;
-        
-        endif;
+        endforeach;
         ?>
 
         <?php $this->render_part( 'paging', compact( 'paging' ) ); ?>

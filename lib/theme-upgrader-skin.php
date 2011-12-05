@@ -9,6 +9,13 @@ class WPAS_Theme_Upgrader_Skin extends Theme_Installer_Skin {
 		$this->done_header = true;
 
         $this->wpas_view->header();
+		
+		if ( $this->wpas_is_upgrade ) {
+			$action = __( 'Upgrading', 'wp-app-store' );
+		}
+		else {
+			$action = __( 'Installing', 'wp-app-store' );
+		}
 
 		$product = $this->wpas_product;
 		?>
@@ -20,7 +27,7 @@ class WPAS_Theme_Upgrader_Skin extends Theme_Installer_Skin {
 			<div class="details">
 	
 				<div class="section-title">
-					<h3><?php _e( 'Installing Theme:', 'wp-app-store' ); echo ' ', $product->title; ?></h3>
+					<h3><?php echo $action, ' ', __( 'Theme', 'wp-app-store' ), ': ', $product->title; ?></h3>
 				</div>
 		
 		<?php

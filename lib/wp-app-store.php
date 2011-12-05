@@ -35,27 +35,33 @@ class WP_App_Store {
         $this->home_url = $this->admin_url . '?page=' . $this->slug;
         $this->themes_url = $this->admin_url . '?page=' . $this->slug . '-themes';
         $this->plugins_url = $this->admin_url . '?page=' . $this->slug . '-plugins';
+        $this->purchases_url = $this->admin_url . '?page=' . $this->slug . '-purchases';
         $this->login_url = $this->home_url . '&wpas-action=login';
         $this->logout_url = $this->home_url . '&wpas-action=logout';
         $this->install_url = $this->home_url . '&wpas-action=install';
-        $this->purchases_url = '';
-        $this->edit_profile_url = '';
+        $this->upgrade_url = $this->home_url . '&wpas-action=upgrade';
         
         $this->title = __( 'WP App Store', 'wp-app-store' );
 
         $this->view = new WPAS_View( $this );
         
-        $this->store_url = 'http://getwpas.com';
+        $this->store_url = 'http://dev.getwpas.com';
         $this->api_url = $this->store_url . '/api';
-        $this->store_login_url = $this->store_url . '/p/login/?wpas-redirect=' . urlencode( $this->login_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
-        $this->store_logout_url = $this->store_url . '/p/logout/?wpas-redirect=' . urlencode( $this->logout_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
+        $this->store_login_url = $this->store_url . '/p/login/?wpas-opener-url=' . urlencode( $this->login_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
+        $this->store_logout_url = $this->store_url . '/p/logout/?wpas-opener-url=' . urlencode( $this->logout_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
         $this->register_url = $this->store_login_url . '&wpas-register=1';
         $this->buy_url = $this->store_url . '/p/o/credit-card/';
+        $this->receipt_url = $this->store_url . '/p/receipt/';
+        $this->edit_profile_url = $this->store_url . '/p/edit-profile/?wpas-opener-url=' . urlencode( $this->login_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
         
         $this->settings = get_option( $this->settings_key );
         
         add_action( 'admin_init', array( $this, 'handle_request' ) );
         add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+    }
+    
+    function get_upgrade_url( $product ) {
+        return $this->upgrade_url . '&wpas-pid=' . urlencode( $product->id ) . '&wpas-ptype=' . urlencode( $product->product_type );
     }
     
     function get_install_url( $product ) {
@@ -107,7 +113,7 @@ class WP_App_Store {
     }
     
     function admin_menu() {
-        $page = add_menu_page( $this->title, __( 'App Store', 'wp-app-store' ), 'install_themes', $this->slug, array( $this, 'page_home' ), '', 70 );
+        $page = add_menu_page( $this->title, __( 'App Store', 'wp-app-store' ), 'install_themes', $this->slug, array( $this, 'page_home' ), '', 3 );
         add_submenu_page( $this->slug, __( 'Themes', 'wp-app-store' ) . ' &lsaquo; ' . $this->title, __( 'Themes', 'wp-app-store' ), 'install_themes', $this->slug . '-themes', array( $this, 'page_product_archive' ) );
         add_submenu_page( $this->slug, __( 'Plugins', 'wp-app-store' ) . ' &lsaquo; ' . $this->title, __( 'Plugins', 'wp-app-store' ), 'install_plugins', $this->slug . '-plugins', array( $this, 'page_product_archive' ) );
         add_submenu_page( $this->slug, __( 'Purchases', 'wp-app-store' ) . ' &lsaquo; ' . $this->title, __( 'Purchases', 'wp-app-store' ), 'install_plugins', $this->slug . '-purchases', array( $this, 'page_purchases' ) );
@@ -189,7 +195,20 @@ class WP_App_Store {
     }
     
     function page_purchases() {
+        $url = $this->api_url . '/purchases/';
+        if ( isset( $_GET['wpas-page'] ) ) $url .= 'page/' . urlencode( $_GET['wpas-page'] ) . '/';
+        $data = $this->api_request( $url );
         
+        if ( $data ) {
+            extract( get_object_vars( $data ) );
+        }
+
+        if ( $error ) {
+            $this->view->render( 'purchases-error', compact( 'error' ) );
+            return false;
+        }
+        
+        $this->view->render( 'purchases', compact( 'items', 'paging' ) );
     }
     
     function action_view_product() {
@@ -208,7 +227,7 @@ class WP_App_Store {
             extract( get_object_vars( $data ) );
         }
         
-        $this->view->render( 'single-product', compact( 'product' ) );
+        $this->view->render( 'single-product', compact( 'product', 'is_purchased' ) );
     }
     
     function action_login() {
@@ -224,7 +243,7 @@ class WP_App_Store {
         exit;
     }
 
-    function action_install() {
+    function action_install( $is_upgrade = false ) {
         $pid = $_GET['wpas-pid'];
         
         if ( 'theme' == $_GET['wpas-ptype'] ) {
@@ -256,7 +275,8 @@ class WP_App_Store {
             $skin = new WPAS_Theme_Upgrader_Skin( compact( 'type', 'title', 'nonce', 'url' ) );
             $skin->wpas_view = $this->view;
             $skin->wpas_product = $product;
-            $installer = new WPAS_Theme_Upgrader( $skin );
+            $skin->wpas_is_upgrade = $is_upgrade;
+            $upgrader = new WPAS_Theme_Upgrader( $skin );
         }
         else {
             require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
@@ -267,11 +287,21 @@ class WP_App_Store {
             $skin = new WPAS_Plugin_Upgrader_Skin( compact( 'type', 'title', 'nonce', 'url' ) );
             $skin->wpas_view = $this->view;
             $skin->wpas_product = $product;
-            $installer = new WPAS_Plugin_Upgrader( $skin );
+            $skin->wpas_is_upgrade = $is_upgrade;
+            $upgrader = new WPAS_Plugin_Upgrader( $skin );
         }
         
         //$product->download_url = '/Users/bradt/Downloads/swatch.zip';
-        $installer->install( $product->download_url );
+        if ( $is_upgrade ) {
+            $upgrader->upgrade( $product->download_url );
+        }
+        else {
+            $upgrader->install( $product->download_url );
+        }
+    }
+    
+    function action_upgrade() {
+        $this->action_install( true );
     }
 
 }

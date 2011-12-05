@@ -59,4 +59,27 @@ class WPAS_View {
         }
         return join( ', ', $publishers );
     }
+    
+    function product_installed_version() {
+        global $product;
+        
+        if ( $product->product_type == 'theme' ) {
+            $installed = get_themes();
+        
+            foreach ( $installed as $install ) {
+                if ( $install['Stylesheet'] == $product->upgrade_token ) {
+                    return $install['Version'];
+                }
+            }
+        }
+        else {
+            $installed = get_plugins();
+            
+            if ( isset( $installed[$product->upgrade_token] ) ) {
+                return $installed[$product->upgrade_token]['Version'];
+            }
+        }
+        
+        return false;
+    }
 }
