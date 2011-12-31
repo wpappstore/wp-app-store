@@ -49,13 +49,20 @@ class WPAS_View {
         return wpautop( $content );
     }
     
-    function publisher_list() {
+    function publisher_list( $with_links = false ) {
         global $product;
         if ( !$product->publishers ) return '';
         
         $publishers = array();
         foreach ( $product->publishers as $pub ) {
-            $publishers[] = $pub->name;
+            if ( $with_links ) {
+                $url = ( $product->product_type == 'theme' ) ? $this->wpas->themes_url : $this->wpas->plugins_url;
+                $url .= '&wpas-publishers[]=' . $pub->id;
+                $publishers[] = sprintf( '<a href="%s">%s</a>', $url, $pub->name );
+            }
+            else {
+                $publishers[] = $pub->name;
+            }
         }
         return join( ', ', $publishers );
     }

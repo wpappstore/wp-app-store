@@ -363,6 +363,10 @@ body, td, textarea, input, select { font-size: 12px; }
         
         .info, .requirements {
             font-size: 1.1em;
+            
+            a {
+                text-decoration: none;
+            }
         }
         
         .more {
@@ -417,6 +421,15 @@ body, td, textarea, input, select { font-size: 12px; }
                 color: #999;
                 white-space: nowrap;
                 font-size: 1.1em;
+                
+                a {
+                    color: #999;
+                    text-decoration: none;
+                    
+                    &:hover {
+                        text-decoration: underline;
+                    }
+                }
             }
             
             .copy {
@@ -471,9 +484,61 @@ body, td, textarea, input, select { font-size: 12px; }
         
         .sidebar {
             float: right;
-            width: 15%;
-            background-color: #eee;
-            height: 1000px;
+            width: 13%;
+            border: 1px solid #ccc;
+            padding: 10px 1%;
+            
+            a {
+                text-decoration: none;
+            }
+            
+            p {
+                margin: 0 0 0.5em 0;
+                color: #666;
+                line-height: 1.2em;
+            }
+            
+            li {
+                margin-bottom: 0.2em;
+                overflow: hidden;
+                color: #666;
+                
+                input {
+                    float: left;
+                    margin-right: 5px;
+                }
+                
+                span {
+                    float: left;
+                }
+            }
+            
+            h4 {
+                font-size: 1em;
+                text-transform: uppercase;
+                color: #bbb;
+                letter-spacing: 1px;
+                margin: 0 0 0.5em 0;
+            }
+            
+            .block {
+                border-bottom: 1px solid #ccc;
+                padding-bottom: 10px;
+                margin-bottom: 12px;
+            }
+            
+            .block:last-child {
+                margin: 0;
+                padding: 0;
+                border: 0;
+            }
+            
+            .newsletter {
+                input {
+                    width: 90%;
+                    margin-bottom: 8px;
+                }
+            }
         }
     }
     

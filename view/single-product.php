@@ -22,9 +22,11 @@
         }
         
         if ( $product->product_type == 'theme' ) {
+            $category_url = $this->wpas->themes_url . '&wpas-categories[]=' . $product->category->id;
             $installed_url = '<a class="more" href="' . self_admin_url('themes.php') . '">' . __( 'View installed themes &#8594;', 'wp-app-store' ) . '</a>';
         }
         else {
+            $category_url = $this->wpas->plugins_url . '&wpas-categories[]=' . $product->category->id;
             $installed_url = '<a class="more" href="' . self_admin_url('plugins.php') . '">' . __( 'View installed plugins &#8594;', 'wp-app-store' ) . '</a>';
         }
         ?>
@@ -56,7 +58,7 @@
         <ul class="info">
             <li>
                 <?php _e( 'Category:', 'wp-app-store' ); ?>
-                <?php echo $product->category->name; ?>
+                <a href="<?php echo $category_url; ?>"><?php echo $product->category->name; ?></a>
             </li>
             <li>
                 <?php _e( 'Updated:', 'wp-app-store' ); ?>
@@ -87,7 +89,7 @@
     
     <div class="main">
         <h2><?php echo ucfirst($product->product_type); ?>: <?php echo $product->title; ?></h2>
-        <p class="publishers">by <?php echo $this->publisher_list(); ?></p>
+        <p class="publishers">by <?php echo $this->publisher_list( true ); ?></p>
         
         <div class="copy">
             <?php echo force_balance_tags( $this->product_description() ); ?>

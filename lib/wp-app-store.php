@@ -177,7 +177,19 @@ class WP_App_Store {
         $type = ( preg_match( '@-themes$@', $_GET['page'] ) ) ? 'themes' : 'plugins';
         
         $url = $this->api_url . '/' . $type . '/';
+        
+        $query_vars = array();
+        foreach ( array( 'categories', 'publishers' ) as $key ) {
+            if ( !isset( $_GET['wpas-' . $key] ) || !is_array( $_GET['wpas-' . $key] ) ) continue;
+            $query_vars[] = $key . ':' . implode( ',', $_GET['wpas-' . $key] );
+        }
+        
+        if ( !empty( $query_vars ) ) {
+            $url .= implode( '+', $query_vars ) . '/';
+        }
+
         if ( isset( $_GET['wpas-page'] ) ) $url .= 'page/' . urlencode( $_GET['wpas-page'] ) . '/';
+        
         $data = $this->api_request( $url );
         
         if ( $data ) {
@@ -191,7 +203,7 @@ class WP_App_Store {
             $page_title = __( 'Plugins', 'wp-app-store' );
         }
         
-        $this->view->render( 'archive-product', compact( 'items', 'paging', 'page_title' ) );
+        $this->view->render( 'archive-product', compact( 'categories', 'publishers', 'items', 'paging', 'page_title' ) );
     }
     
     function page_purchases() {

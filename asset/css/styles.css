@@ -209,6 +209,8 @@ body, td, textarea, input, select {
       padding-right: 17px; }
 #wp-app-store .product.single .info, #wp-app-store .product.single .requirements {
   font-size: 1.1em; }
+  #wp-app-store .product.single .info a, #wp-app-store .product.single .requirements a {
+    text-decoration: none; }
 #wp-app-store .product.single .more {
   text-decoration: none; }
   #wp-app-store .product.single .more span {
@@ -242,6 +244,11 @@ body, td, textarea, input, select {
     color: #999;
     white-space: nowrap;
     font-size: 1.1em; }
+    #wp-app-store .product.single .main > .publishers a {
+      color: #999;
+      text-decoration: none; }
+      #wp-app-store .product.single .main > .publishers a:hover {
+        text-decoration: underline; }
   #wp-app-store .product.single .main .copy {
     font-size: 1.2em;
     line-height: 1.4em;
@@ -273,9 +280,41 @@ body, td, textarea, input, select {
   width: 83%; }
 #wp-app-store .archive .sidebar {
   float: right;
-  width: 15%;
-  background-color: #eee;
-  height: 1000px; }
+  width: 13%;
+  border: 1px solid #ccc;
+  padding: 10px 1%; }
+  #wp-app-store .archive .sidebar a {
+    text-decoration: none; }
+  #wp-app-store .archive .sidebar p {
+    margin: 0 0 0.5em 0;
+    color: #666;
+    line-height: 1.2em; }
+  #wp-app-store .archive .sidebar li {
+    margin-bottom: 0.2em;
+    overflow: hidden;
+    color: #666; }
+    #wp-app-store .archive .sidebar li input {
+      float: left;
+      margin-right: 5px; }
+    #wp-app-store .archive .sidebar li span {
+      float: left; }
+  #wp-app-store .archive .sidebar h4 {
+    font-size: 1em;
+    text-transform: uppercase;
+    color: #bbb;
+    letter-spacing: 1px;
+    margin: 0 0 0.5em 0; }
+  #wp-app-store .archive .sidebar .block {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 12px; }
+  #wp-app-store .archive .sidebar .block:last-child {
+    margin: 0;
+    padding: 0;
+    border: 0; }
+  #wp-app-store .archive .sidebar .newsletter input {
+    width: 90%;
+    margin-bottom: 8px; }
 #wp-app-store .installing .featured-image {
   width: 30%;
   float: left;
