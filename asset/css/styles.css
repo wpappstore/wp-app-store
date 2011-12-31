@@ -300,6 +300,7 @@ body, td, textarea, input, select {
       float: left; }
   #wp-app-store .archive .sidebar h4 {
     font-size: 1em;
+    font-weight: normal;
     text-transform: uppercase;
     color: #bbb;
     letter-spacing: 1px;
@@ -313,8 +314,12 @@ body, td, textarea, input, select {
     padding: 0;
     border: 0; }
   #wp-app-store .archive .sidebar .newsletter input {
-    width: 90%;
+    width: 98%;
     margin-bottom: 8px; }
+  #wp-app-store .archive .sidebar .newsletter button {
+    color: #666; }
+    #wp-app-store .archive .sidebar .newsletter button:hover {
+      color: #333; }
 #wp-app-store .installing .featured-image {
   width: 30%;
   float: left;

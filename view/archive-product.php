@@ -37,8 +37,9 @@
         <div class="block newsletter">
             <h4><?php _e( 'Newsletter' ); ?></h4>
             <p><?php printf( __( 'Receive a weekly email featuring new %s releases, special offers, and more.' ), strtolower( trim( $page_title, 's' ) ) ); ?></p>
-            <form method="post" action="">
-            <input type="email" name="wpas-email" placeholder="<?php _e( 'example@domain.com' ); ?>" />
+            <form method="post" action="http://wpappstore.createsend.com/t/j/s/<?php echo $mailing_list_id; ?>/" target="_blank">
+            <input type="text" name="cm-name" placeholder="<?php _e( 'Name' ); ?>" />
+            <input type="text" name="cm-<?php echo $mailing_list_id; ?>-<?php echo $mailing_list_id; ?>" placeholder="<?php _e( 'Email address' ); ?>" />
             <button type="submit" class="button"><?php _e( 'Subscribe' ); ?></button>
             </form>
         </div>

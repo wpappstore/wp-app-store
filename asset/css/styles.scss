@@ -515,6 +515,7 @@ body, td, textarea, input, select { font-size: 12px; }
             
             h4 {
                 font-size: 1em;
+                font-weight: normal;
                 text-transform: uppercase;
                 color: #bbb;
                 letter-spacing: 1px;
@@ -535,8 +536,16 @@ body, td, textarea, input, select { font-size: 12px; }
             
             .newsletter {
                 input {
-                    width: 90%;
+                    width: 98%;
                     margin-bottom: 8px;
+                }
+                
+                button {
+                    color: #666;
+                    
+                    &:hover {
+                        color: #333;
+                    }
                 }
             }
         }

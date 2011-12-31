@@ -198,12 +198,14 @@ class WP_App_Store {
         
         if ( 'themes' == $type ) {
             $page_title = __( 'Themes', 'wp-app-store' );
+            $mailing_list_id = 'dkkui';
         }
         else {
             $page_title = __( 'Plugins', 'wp-app-store' );
+            $mailing_list_id = 'dkkud';
         }
         
-        $this->view->render( 'archive-product', compact( 'categories', 'publishers', 'items', 'paging', 'page_title' ) );
+        $this->view->render( 'archive-product', compact( 'categories', 'publishers', 'items', 'paging', 'page_title', 'mailing_list_id' ) );
     }
     
     function page_purchases() {
