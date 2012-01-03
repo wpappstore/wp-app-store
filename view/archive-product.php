@@ -74,6 +74,8 @@
             </ul>
         </div>
         <?php endif; ?>
+        
+        <button type="submit" class="button">Filter</button>
 
         </form>
         

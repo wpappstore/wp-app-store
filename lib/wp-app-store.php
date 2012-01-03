@@ -148,7 +148,7 @@ class WP_App_Store {
             $url = add_query_arg( compact( 'login_key' ), $url );
         }
         
-        $data = wp_remote_get( $url );
+        $data = wp_remote_get( $url, array( 'sslverify' => false ) );
 
         if ( is_wp_error( $data ) ) return false;
 

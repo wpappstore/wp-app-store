@@ -48,9 +48,12 @@
             social_tools: ''
         });
         
+        /*
         $('form.archive-filter input').click(function() {
             this.form.submit();
         });
+        */
+        
     });
     
     function popup_window( url, name, width, height, e ) {

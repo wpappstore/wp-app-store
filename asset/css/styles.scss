@@ -539,13 +539,13 @@ body, td, textarea, input, select { font-size: 12px; }
                     width: 98%;
                     margin-bottom: 8px;
                 }
+            }
                 
-                button {
-                    color: #666;
-                    
-                    &:hover {
-                        color: #333;
-                    }
+            button {
+                color: #666;
+                
+                &:hover {
+                    color: #333;
                 }
             }
         }
