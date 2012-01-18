@@ -9,6 +9,8 @@
         <span class="sep">|</span>
         <a href="<?php echo $this->wpas->purchases_url; ?>" class="purchases">Purchases</a>
         <span class="sep">|</span>
+        <a href="<?php echo $this->wpas->bonuses_url; ?>" class="bonuses">Bonuses</a>
+        <span class="sep">|</span>
         <a href="<?php echo $this->wpas->edit_profile_url; ?>" class="edit-profile">Edit Profile</a>
         <span class="sep">|</span>
         <a href="<?php echo $this->wpas->store_logout_url; ?>" class="logout">Logout</a>

@@ -21,8 +21,8 @@
                     </a>
                     <div class="details">
                         <h4><?php echo ucfirst($product->product_type); ?>: <?php echo $product->title; ?></h4>
-                        <p class="publisher">by <?php echo $this->publisher_list(); ?></p>
-                        <p class="date">Purchased <?php echo date( 'F jS, Y', $product->purchase_date ); ?></p>
+                        <p class="publisher"><?php _e( 'by', 'wp-app-store' ); ?> <?php echo $this->publisher_list(); ?></p>
+                        <p class="date"><?php _e( 'Purchased', 'wp-app-store' ); ?> <?php echo date( 'F jS, Y', $product->purchase_date ); ?></p>
                     </div>
                     <div class="status">
                         <p><?php _e( 'Latest Release:', 'wp-app-store' ); ?> <?php echo $product->version; ?></p>

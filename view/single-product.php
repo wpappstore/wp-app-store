@@ -17,7 +17,12 @@
         }
         else {
             $url = $this->wpas->get_buy_url( $product );
-            $button_txt = __( 'Buy &amp; Install', 'wp-app-store' );
+            if ( $is_bonus_applicable ) {
+                $button_txt = __( 'Use Bonus', 'wp-app-store' );
+            }
+            else {
+                $button_txt = __( 'Buy &amp; Install', 'wp-app-store' );
+            }
             $css_class = 'buy';
         }
         
@@ -51,9 +56,29 @@
                     <?php printf( __( 'You have already purchased this %s.', 'wp-app-store' ), $product->product_type ); ?><br />
                     <a class="more" href="<?php echo $this->wpas->purchases_url; ?>"><?php _e( 'Review your purchases &#8594;', 'wp-app-store' ); ?></a>
                 </div>
+                <?php elseif ( $is_bonus_applicable ) : ?>
+                <div class="note">
+                    <?php printf( __( 'You may use a bonus credit to get this %s for free.', 'wp-app-store' ), $product->product_type ); ?><br />
+                    <a class="more" href="<?php echo $this->wpas->bonuses_url; ?>"><?php _e( 'Review your bonuses &#8594;', 'wp-app-store' ); ?></a>
+                </div>
                 <?php endif; ?>
             <?php endif; ?>
         </div>
+
+        <?php if ( $product->bonus_count && !$is_purchased && !$is_bonus_applicable ) : ?>
+            <p class="bonus-details">
+                <strong>
+                <?php if ( $product->bonus_count > 1 ) : ?>
+                    <?php printf( __( '%s Bonus %ss Included', 'wp-app-store' ), $product->bonus_count, ucfirst( $product->product_type ) ); ?>
+                <?php else : ?>
+                    <?php printf( __( '%s Bonus %s Included', 'wp-app-store' ), $product->bonus_count, ucfirst( $product->product_type ) ); ?>
+                <?php endif; ?>
+                </strong>
+                -
+                <?php printf( __( 'Your account will receive %s bonus credits
+                instantly after purchase.', 'wp-app-store' ), $product->bonus_count ); ?>
+            </p>
+        <?php endif; ?>
         
         <ul class="info">
             <li>

@@ -36,6 +36,7 @@ class WP_App_Store {
         $this->themes_url = $this->admin_url . '?page=' . $this->slug . '-themes';
         $this->plugins_url = $this->admin_url . '?page=' . $this->slug . '-plugins';
         $this->purchases_url = $this->admin_url . '?page=' . $this->slug . '-purchases';
+        $this->bonuses_url = $this->home_url . '&wpas-action=bonuses';
         $this->login_url = $this->home_url . '&wpas-action=login';
         $this->logout_url = $this->home_url . '&wpas-action=logout';
         $this->install_url = $this->home_url . '&wpas-action=install';
@@ -225,6 +226,23 @@ class WP_App_Store {
         $this->view->render( 'purchases', compact( 'items', 'paging' ) );
     }
     
+    function action_bonuses() {
+        $url = $this->api_url . '/bonuses/';
+        if ( isset( $_GET['wpas-page'] ) ) $url .= 'page/' . urlencode( $_GET['wpas-page'] ) . '/';
+        $data = $this->api_request( $url );
+        
+        if ( $data ) {
+            extract( get_object_vars( $data ) );
+        }
+
+        if ( $error ) {
+            $this->view->render( 'bonuses-error', compact( 'error' ) );
+            return false;
+        }
+        
+        $this->view->render( 'bonuses', compact( 'items', 'paging' ) );
+    }
+    
     function action_view_product() {
         $pid = $_GET['wpas-pid'];
         
@@ -241,7 +259,7 @@ class WP_App_Store {
             extract( get_object_vars( $data ) );
         }
         
-        $this->view->render( 'single-product', compact( 'product', 'is_purchased' ) );
+        $this->view->render( 'single-product', compact( 'product', 'is_purchased', 'is_bonus_applicable' ) );
     }
     
     function action_login() {

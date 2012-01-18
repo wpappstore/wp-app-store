@@ -23,10 +23,10 @@ $Georgia: Georgia,"Times New Roman","Bitstream Charter",Times,serif;
   box-shadow: inset 0 1px 0 0 #96ca6d;
   color: #D7FFD7;
   line-height: 1.5;
-  padding: 10px 0 8px 0;
+  padding: 10px 2% 8px 2%;
   text-align: center;
   text-shadow: 0 -1px 0 #4c9021;
-  width: 70%;
+  width: 66%;
   text-decoration: none;
   font-size: 1.8em;
   font-weight: bold;
@@ -646,6 +646,36 @@ body, td, textarea, input, select { font-size: 12px; }
                 margin: 10px 0 0 0;
                 width: 22%;
                 text-align: right;
+            }
+        }
+    }
+        
+    .bonuses {
+        .bonus {
+            border: 1px solid #ccc;
+            width: 46%;
+            padding: 1%;
+            overflow: hidden;
+            float: left;
+            margin: 0 2% 2% 0;
+            
+            &.even {
+                float: right;
+                margin-right: 0;
+            }
+            
+            .publisher-title {
+                font-size: 1.4em;
+                line-height: 1.1em;
+                width: 30%;
+                margin: 0;
+                padding: 0;
+                float: left;
+            }
+            
+            .applicable {
+                float: right;
+                width: 60%;
             }
         }
     }
