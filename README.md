@@ -1,21 +1,19 @@
-=== WP App Store ===
-Contributors: bradt
-Tags: store, apps, themes, plugins, purchase, buy
-Requires at least: 3.0
-Tested up to: 3.3.1
-Stable tag: trunk
+WP App Store
+============
 
-Purchase & install themes and plugins from top brands from within your WordPress dashboard.
+A WordPress plugin allowing you to purchase and install themes and plugins from top brands from within your WordPress dashboard.
 
-== Description ==
+### Launching in April
 
-Purchase & install themes and plugins from top brands from within your WordPress dashboard.
+We have not launched yet, so don't bother downloading this plugin (it doesn't do anything yet). Instead, sign up for our mailing list at  [wpappstore.com](http://wpappstore.com/) to be notified when we launch.
 
-== Installation ==
+Frequently Asked Questions
+--------------------------
 
-Use the plugin installer built into WordPress.
+### How can I add my themes/plugins to the store?
 
-== Changelog ==
+We're currently working hard integrating the vendors who have already committed and getting the store ready for launch. However, if you'd like in the next batch of vendors added to the store shortly after launch, simply send an email to <hi@wpappstore.com> introducing yourself and your products. We love hearing from enthusiastic new vendors!
 
-= 0.1 - 2012-03-18 =
-* Pre-release to record screencast
+### Why isn't this in the WordPress.org plugin directory?
+
+Unfortunately storefront plugins are against the [WordPress.org plugin directory guidelines](http://wordpress.org/extend/plugins/about/guidelines/).
