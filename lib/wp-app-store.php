@@ -171,6 +171,11 @@ class WP_App_Store {
     }
     
     function page_home() {
+        if ( !defined( 'WPAPPSTORE_PRELAUNCH' ) ) {
+            $this->view->render( 'launching' );
+            return;
+        }
+
         if ( $this->handle_action() ) return;
         
         $data = $this->api_request( $this->api_url . '/home/' );
@@ -183,6 +188,11 @@ class WP_App_Store {
     }
     
     function page_product_archive() {
+        if ( !defined( 'WPAPPSTORE_PRELAUNCH' ) ) {
+            $this->view->render( 'launching' );
+            return;
+        }
+
         $type = ( preg_match( '@-themes$@', $_GET['page'] ) ) ? 'themes' : 'plugins';
         
         $url = $this->api_url . '/' . $type . '/';
