@@ -184,6 +184,8 @@ body, td, textarea, input, select {
   line-height: 1.3em;
   padding-right: 1%;
   font-family: "Georgia", serif; }
+#wp-app-store .product.single .bonus-applicable .price {
+  text-decoration: line-through; }
 #wp-app-store .product.single .links {
   margin: 1em 0 2em 0;
   border-top: 1px solid #ccc;

@@ -328,6 +328,10 @@ body, td, textarea, input, select { font-size: 12px; }
             font-family: "Georgia", serif;
         }
         
+        .bonus-applicable .price {
+            text-decoration: line-through;
+        }
+        
         .links {
             margin: 1em 0 2em 0;
             border-top: 1px solid #ccc;

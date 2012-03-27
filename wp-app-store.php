@@ -1,10 +1,10 @@
 <?php
 /*
 Plugin Name: WP App Store
-Plugin URI: http://getwpas.com/
-Description: 1-click purchase and installation of quality themes and plugins from within WordPress.
+Plugin URI: http://wpappstore.com/
+Description: Purchase & install themes and plugins from top brands from within your WordPress dashboard.
 Author: WP App Store Inc.
-Author URI: http://getwpas.com/
+Author URI: http://wpappstore.com/
 Version: 1.0
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */

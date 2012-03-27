@@ -2,6 +2,11 @@
 
 <div class="product single">
 
+    <script>
+    WPAPPSTORE.PRODUCT_TYPE = '<?php echo addslashes( $product->product_type ); ?>';
+    WPAPPSTORE.PRODUCT_ID = '<?php echo addslashes( $product->id ); ?>';
+    </script>
+    
     <div class="sidebar">
         <img class="featured-image" src="<?php echo $product->image->src; ?>" alt="<?php echo esc_attr( $product->title ); ?>" />
         
@@ -10,9 +15,9 @@
         
         $price = ( $product->price ) ? $product->price : 0;
         $price = '$' . number_format( $price );
-        
+
         if ( $is_purchased ) {
-            $url = $this->wpas->get_install_url( $product );
+            $install_url = $this->wpas->get_install_url( $product );
             $button_txt = __( 'Install', 'wp-app-store' );
         }
         else {
@@ -38,30 +43,37 @@
         <div class="install <?php echo $css_class; ?>">
             <?php if ( $installed_version = $this->product_installed_version() ) : ?>
                 <div class="installed-msg">
-                    <?php if ( $is_purchased ) : ?>
+                    <div class="purchased" style="display: none;">
                         <?php printf( __( 'This %s is already installed.', 'wp-app-store' ), $product->product_type ); ?><br />
                         <?php echo $installed_url; ?><br />
                         <a class="more" href="<?php echo $this->wpas->purchases_url; ?>"><?php _e( 'Review your purchases &#8594;', 'wp-app-store' ); ?></a>
-                    <?php else : ?>
+                    </div>
+                    <div class="not-purchased">
                         <?php printf( __( 'This %s is already installed but was not purchased through this store.', 'wp-app-store' ), $product->product_type ); ?><br />
                         <?php echo $installed_url; ?><br />
-                    <?php endif; ?>
+                    </div>
                 </div>
                 <div class="price"><?php echo $price; ?></div>
             <?php else : ?>
-                <a href="<?php echo $url; ?>" class="install-button"><?php echo $button_txt; ?></a>
-                <div class="price"><?php echo $price; ?></div>
-                <?php if ( $is_purchased ) : ?>
-                <div class="note">
-                    <?php printf( __( 'You have already purchased this %s.', 'wp-app-store' ), $product->product_type ); ?><br />
-                    <a class="more" href="<?php echo $this->wpas->purchases_url; ?>"><?php _e( 'Review your purchases &#8594;', 'wp-app-store' ); ?></a>
+                <div class="not-purchased">
+                    <a href="<?php echo $this->wpas->get_buy_url( $product ); ?>" class="install-button"><?php _e( 'Buy &amp; Install', 'wp-app-store' ); ?></a>
+                    <div class="price"><?php echo $price; ?></div>
                 </div>
-                <?php elseif ( $is_bonus_applicable ) : ?>
-                <div class="note">
-                    <?php printf( __( 'You may use a bonus credit to get this %s for free.', 'wp-app-store' ), $product->product_type ); ?><br />
-                    <a class="more" href="<?php echo $this->wpas->bonuses_url; ?>"><?php _e( 'Review your bonuses &#8594;', 'wp-app-store' ); ?></a>
+                <div class="purchased" style="display: none;">
+                    <a href="<?php echo $this->wpas->get_install_url( $product ); ?>" class="install-button"><?php _e( 'Install', 'wp-app-store' ); ?></a>
+                    <div class="note">
+                        <?php printf( __( 'You have already purchased this %s.', 'wp-app-store' ), $product->product_type ); ?><br />
+                        <a class="more" href="<?php echo $this->wpas->purchases_url; ?>"><?php _e( 'Review your purchases &#8594;', 'wp-app-store' ); ?></a>
+                    </div>
                 </div>
-                <?php endif; ?>
+                <div class="bonus-applicable" style="display: none;">
+                    <a href="<?php echo $this->wpas->get_buy_url( $product ); ?>" class="install-button"><?php _e( 'Use Bonus', 'wp-app-store' ); ?></a>
+                    <div class="price"><?php echo $price; ?></div>
+                    <div class="note">
+                        <?php printf( __( 'You may use a bonus credit to get this %s for free.', 'wp-app-store' ), $product->product_type ); ?><br />
+                        <a class="more" href="<?php echo $this->wpas->bonuses_url; ?>"><?php _e( 'Review your bonuses &#8594;', 'wp-app-store' ); ?></a>
+                    </div>
+                </div>
             <?php endif; ?>
         </div>
 

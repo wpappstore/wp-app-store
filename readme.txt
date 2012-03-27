@@ -2,24 +2,20 @@
 Contributors: bradt
 Tags: store, apps, themes, plugins, purchase, buy
 Requires at least: 3.0
-Tested up to: 3.3
-Stable tag: 1.0
+Tested up to: 3.3.1
+Stable tag: trunk
 
-This WordPress plugin is in development and not yet ready for public use.
+Purchase & install themes and plugins from top brands from within your WordPress dashboard.
 
 == Description ==
 
-This WordPress plugin is in development and not yet ready for public use.
+Purchase & install themes and plugins from top brands from within your WordPress dashboard.
 
 == Installation ==
 
 Use the plugin installer built into WordPress.
 
-== Screenshots ==
-
-1. WP App Store dashboard
-
 == Changelog ==
 
-= 1.0 - 2012-02-15 =
-* First release
+= 0.1 - 2012-03-18 =
+* Pre-release to record screencast

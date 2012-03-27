@@ -21,7 +21,7 @@ class WP_App_Store {
     
     public $user = null;
     public $view = null;
-
+    
     function __construct( $path ) {
         $this->dir_path = dirname( $path );
         $this->basename = plugin_basename( $this->dir_path );
@@ -35,23 +35,30 @@ class WP_App_Store {
         $this->home_url = $this->admin_url . '?page=' . $this->slug;
         $this->themes_url = $this->admin_url . '?page=' . $this->slug . '-themes';
         $this->plugins_url = $this->admin_url . '?page=' . $this->slug . '-plugins';
-        $this->purchases_url = $this->admin_url . '?page=' . $this->slug . '-purchases';
+        $this->purchases_url = $this->home_url . '&wpas-action=purchases';
         $this->bonuses_url = $this->home_url . '&wpas-action=bonuses';
         $this->login_url = $this->home_url . '&wpas-action=login';
-        $this->logout_url = $this->home_url . '&wpas-action=logout';
+        $this->logout_url = $this->home_url . '&wpas-action=logout&wpas-redirect=' . $this->home_url;
         $this->install_url = $this->home_url . '&wpas-action=install';
         $this->upgrade_url = $this->home_url . '&wpas-action=upgrade';
-        
+       
         $this->title = __( 'WP App Store', 'wp-app-store' );
 
         $this->view = new WPAS_View( $this );
         
-        $this->store_url = 'http://dev.getwpas.com';
+        if ( 'dev.bradt.ca' == $_SERVER['SERVER_NAME'] ) {
+            $this->store_url = 'http://dev.wpappstore.com';
+            $this->checkout_url = 'http://dev.checkout.wpappstore.com';
+        }
+        else {
+            $this->store_url = 'https://wpappstore.com';
+            $this->checkout_url = 'https://checkout.wpappstore.com';
+        }
+        
         $this->api_url = $this->store_url . '/api';
         $this->store_login_url = $this->store_url . '/p/login/?wpas-opener-url=' . urlencode( $this->login_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
-        $this->store_logout_url = $this->store_url . '/p/logout/?wpas-opener-url=' . urlencode( $this->logout_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
         $this->register_url = $this->store_login_url . '&wpas-register=1';
-        $this->buy_url = $this->store_url . '/p/o/credit-card/';
+        $this->buy_url = $this->store_url . '/p/o/buy/';
         $this->receipt_url = $this->store_url . '/p/receipt/';
         $this->edit_profile_url = $this->store_url . '/p/edit-profile/?wpas-opener-url=' . urlencode( $this->login_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
         
@@ -114,14 +121,12 @@ class WP_App_Store {
     }
     
     function admin_menu() {
-        $page = add_menu_page( $this->title, __( 'App Store', 'wp-app-store' ), 'install_themes', $this->slug, array( $this, 'page_home' ), '', 3 );
+        add_menu_page( $this->title, __( 'WP App Store', 'wp-app-store' ), 'install_themes', $this->slug, array( $this, 'page_home' ) );
         add_submenu_page( $this->slug, __( 'Themes', 'wp-app-store' ) . ' &lsaquo; ' . $this->title, __( 'Themes', 'wp-app-store' ), 'install_themes', $this->slug . '-themes', array( $this, 'page_product_archive' ) );
-        add_submenu_page( $this->slug, __( 'Plugins', 'wp-app-store' ) . ' &lsaquo; ' . $this->title, __( 'Plugins', 'wp-app-store' ), 'install_plugins', $this->slug . '-plugins', array( $this, 'page_product_archive' ) );
-        add_submenu_page( $this->slug, __( 'Purchases', 'wp-app-store' ) . ' &lsaquo; ' . $this->title, __( 'Purchases', 'wp-app-store' ), 'install_plugins', $this->slug . '-purchases', array( $this, 'page_purchases' ) );
+        add_submenu_page( $this->slug, __( 'Plugins', 'wp-app-store' ) . ' &lsaquo; ' . $this->title, __( 'Plugins', 'wp-app-store' ), 'install_themes', $this->slug . '-plugins', array( $this, 'page_product_archive' ) );
 
-        // Change submenu name
         global $submenu;
-        //$submenu[ $this->slug ][0][0] = 'Featured';
+        $submenu[$this->slug][0][0] = __( 'Home', 'wp-app-store' );
 
         add_action( 'admin_print_styles', array( $this, 'enqueue_styles' ) );
         add_action( 'admin_print_scripts', array( $this, 'enqueue_scripts' ) );
@@ -143,16 +148,19 @@ class WP_App_Store {
         wp_enqueue_script( 'prettyPhoto', $this->js_url . '/jquery.prettyPhoto.js', array( 'jquery' ) );
     }
     
-    function api_request( $url ) {
-        $login_key = $this->get_setting( 'login_key' );
-        if ( $login_key ) {
-            $url = add_query_arg( compact( 'login_key' ), $url );
+    function api_request( $url, $use_cookie = false ) {
+        $args = array(
+            'sslverify' => false
+        );
+        
+        if ( $use_cookie ) {
+            $args['cookies'] = array( new WP_Http_Cookie( $this->get_setting( 'cookie' ) ) );
         }
         
-        $data = wp_remote_get( $url, array( 'sslverify' => false ) );
+        $data = wp_remote_get( $url, $args );
 
         if ( is_wp_error( $data ) ) return false;
-
+        
         $data = json_decode( $data['body'] );
         
         if ( isset( $data->user ) ) {
@@ -209,10 +217,10 @@ class WP_App_Store {
         $this->view->render( 'archive-product', compact( 'categories', 'publishers', 'items', 'paging', 'page_title', 'mailing_list_id' ) );
     }
     
-    function page_purchases() {
+    function action_purchases() {
         $url = $this->api_url . '/purchases/';
         if ( isset( $_GET['wpas-page'] ) ) $url .= 'page/' . urlencode( $_GET['wpas-page'] ) . '/';
-        $data = $this->api_request( $url );
+        $data = $this->api_request( $url, true );
         
         if ( $data ) {
             extract( get_object_vars( $data ) );
@@ -229,7 +237,7 @@ class WP_App_Store {
     function action_bonuses() {
         $url = $this->api_url . '/bonuses/';
         if ( isset( $_GET['wpas-page'] ) ) $url .= 'page/' . urlencode( $_GET['wpas-page'] ) . '/';
-        $data = $this->api_request( $url );
+        $data = $this->api_request( $url, true );
         
         if ( $data ) {
             extract( get_object_vars( $data ) );
@@ -263,15 +271,14 @@ class WP_App_Store {
     }
     
     function action_login() {
-        $this->update_setting( 'login_key', $_GET['wpas-key'] );
+        $this->update_setting( 'cookie', $_GET['wpas-cookie'] );
         wp_redirect( $_GET['wpas-redirect'] );
         exit;
     }
     
     function action_logout() {
-        $this->api_request( $this->api_url . '/logout/' );
-        $this->update_setting( 'login_key', '' );
-        wp_redirect( $_GET['wpas-redirect'] );
+        $this->update_setting( 'cookie', '' );
+        wp_redirect( $this->home_url );
         exit;
     }
 
@@ -285,7 +292,7 @@ class WP_App_Store {
             $ptype = 'plugin';
         }
         
-        $data = $this->api_request( $this->api_url . '/' . $ptype . '/install/' . urlencode( $pid ) . '/' );
+        $data = $this->api_request( $this->api_url . '/' . $ptype . '/install/' . urlencode( $pid ) . '/', true );
 
         if ( $data ) {
             extract( get_object_vars( $data ) );
