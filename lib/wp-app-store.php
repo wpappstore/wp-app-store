@@ -16,11 +16,15 @@ class WP_App_Store {
 
     public $prefix = 'wpas';
     public $slug = 'wp-app-store';
-    public $settings_key = 'wpas-settings';
-    public $settings = array();
+    public $upgrade_token = 'wp-app-store/wp-app-store.php';
     
     public $user = null;
     public $view = null;
+    
+    public $output = array(
+        'head' => '',
+        'body' => ''
+    );
     
     function __construct( $path ) {
         $this->dir_path = dirname( $path );
@@ -35,12 +39,8 @@ class WP_App_Store {
         $this->home_url = $this->admin_url . '?page=' . $this->slug;
         $this->themes_url = $this->admin_url . '?page=' . $this->slug . '-themes';
         $this->plugins_url = $this->admin_url . '?page=' . $this->slug . '-plugins';
-        $this->purchases_url = $this->home_url . '&wpas-action=purchases';
-        $this->bonuses_url = $this->home_url . '&wpas-action=bonuses';
-        $this->login_url = $this->home_url . '&wpas-action=login';
-        $this->logout_url = $this->home_url . '&wpas-action=logout&wpas-redirect=' . $this->home_url;
-        $this->install_url = $this->home_url . '&wpas-action=install';
-        $this->upgrade_url = $this->home_url . '&wpas-action=upgrade';
+        $this->install_url = $this->home_url . '&wpas-do=install';
+        $this->upgrade_url = $this->home_url . '&wpas-do=upgrade';
        
         $this->title = __( 'WP App Store', 'wp-app-store' );
 
@@ -55,35 +55,29 @@ class WP_App_Store {
             $this->checkout_url = 'https://checkout.wpappstore.com';
         }
         
-        $this->api_url = $this->store_url . '/api';
+        $this->api_url = $this->store_url . '/api/client';
         $this->store_login_url = $this->store_url . '/p/login/?wpas-opener-url=' . urlencode( $this->login_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
         $this->register_url = $this->store_login_url . '&wpas-register=1';
         $this->buy_url = $this->store_url . '/p/o/buy/';
         $this->receipt_url = $this->store_url . '/p/receipt/';
         $this->edit_profile_url = $this->store_url . '/p/edit-profile/?wpas-opener-url=' . urlencode( $this->login_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
         
-        $this->settings = get_option( $this->settings_key );
-        
         add_action( 'admin_init', array( $this, 'handle_request' ) );
         add_action( 'admin_menu', array( $this, 'admin_menu' ) );
     }
     
-    function get_upgrade_url( $product ) {
-        return $this->upgrade_url . '&wpas-pid=' . urlencode( $product->id ) . '&wpas-ptype=' . urlencode( $product->product_type );
+    function get_install_upgrade_url( $base_url, $nonce ) {
+        return $base_url . '&wpas-pid=' . urlencode( $_GET['wpas-pid'] ) . '&wpas-ptype=' . urlencode( $_GET['wpas-ptype'] ) . '&_nonce=' . urlencode( $nonce );
     }
     
-    function get_install_url( $product ) {
-        return $this->install_url . '&wpas-pid=' . urlencode( $product->id ) . '&wpas-ptype=' . urlencode( $product->product_type );
+    function get_upgrade_url() {
+        $nonce = $this->create_nonce( 'upgrade', $_GET['wpas-ptype'], $_GET['wpas-token'] );
+        return $this->get_install_upgrade_url( $this->upgrade_url, $nonce );
     }
     
-    function get_buy_url( $product ) {
-        $url = $this->buy_url . '?wpas-pid=' . urlencode( $product->id ) . '&wpas-install-url=' . urlencode( $this->get_install_url( $product ) );
-
-        if ( !$this->user ) {
-            $url .= '&wpas-login-url=' . urlencode( $this->login_url );
-        }
-        
-        return $url;
+    function get_install_url() {
+        $nonce = $this->create_nonce( 'install', $_GET['wpas-ptype'], $_GET['wpas-token'] );
+        return $this->get_install_upgrade_url( $this->install_url, $nonce );
     }
     
     function current_url() {
@@ -92,207 +86,233 @@ class WP_App_Store {
         return sprintf( 'http%s://%s%s%s', $ssl, $_SERVER['SERVER_NAME'], $port, $_SERVER['REQUEST_URI'] );
     }
     
-    function get_setting( $key ) {
-        if ( isset( $this->settings[$key] ) ) {
-            return $this->settings[$key];
-        }
-        return '';
+    function create_nonce( $action, $type, $token ) {
+        return wp_create_nonce( 'wpas-' . $action . '-' . $type . '-' . $token );
     }
     
-    function update_setting( $key, $val ) {
-        if ( !is_array( $this->settings ) ) $this->settings = array();
-        $this->settings = array();
-        $this->settings[$key] = $val;
-        update_option( $this->settings_key, $this->settings );
+    function get_purchase_tokens_data() {
+        $url = $this->api_url . '/user/purchase-tokens/';
+        $url = add_query_arg( 'wpas-key', $_GET['wpas-key'], $url );
+        
+        if ( !( $product_types = $this->api_get( $url ) ) ) {
+            return array();
+        }
+        
+        foreach ( $product_types as $type => $tokens ) {
+            $products = call_user_func( 'get_' . $type . 's' );
+            $nonces[$type] = array();
+            $installed_versions[$type] = array();
+            foreach ( $tokens as $token ) {
+                $nonces[$type][$token] = $this->create_nonce( 'install', $type, $token );
+                if ( isset( $products[$token]['Version'] ) ) {
+                    $installed_versions[$type][$token] = $products[$token]['Version'];
+                }
+            }
+        }
+        
+        return compact( 'nonces', 'installed_versions' );
     }
     
     function handle_request() {
-        if ( !isset( $_GET['wpas-redirect'] ) || !$_GET['wpas-redirect'] ) return;
-        $this->handle_action();
+        if ( !$this->is_wpas_page() ) return;
+        
+        if ( !defined( 'WPAPPSTORE_PRELAUNCH' ) ) {
+            $this->output['body'] .= $this->view->get( 'launching' );
+            return;
+        }
+        
+        // 'Do' a local task
+        if ( $this->handle_do( $data ) ) return;
+
+        $url = $this->api_url();
+
+        if ( isset( $_GET['wpas-purchase-tokens'] ) ) {
+            $body = $this->get_purchase_tokens_data();
+            $body = http_build_query( $body );
+            
+            $data = $this->api_post( $url, $body );
+        }
+        elseif ( 'POST' == $_SERVER['REQUEST_METHOD'] ) {
+            $data = $this->api_post( $url, http_build_query( $_POST ) );
+        }
+        else {
+            $data = $this->api_get( $url );
+        }
+        
+        if ( $data ) {
+            $this->output['body'] .= $data['body'];
+            if ( isset( $data['head'] ) ) {
+                $this->output['head'] .= $data['head'];
+            }
+        
+            if ( isset( $_GET['wpas-ptype'] ) && isset( $_GET['wpas-token'] ) ) {
+                $this->output['head'] .= "
+                    <script>
+                    WPAPPSTORE.PRODUCT_TOKEN = '" . addslashes( $_GET['wpas-token'] ) . "';
+                    WPAPPSTORE.PRODUCT_TYPE = '" . addslashes( $_GET['wpas-ptype'] ) . "';
+                    WPAPPSTORE.PRODUCT_ID = '" . addslashes( $_GET['wpas-pid'] ) . "';
+                    WPAPPSTORE.INSTALL_URL = '" . addslashes( $this->get_install_url() ) . "';
+                    WPAPPSTORE.UPGRADE_URL = '" . addslashes( $this->get_upgrade_url() ) . "';
+                ";
+                if ( $version = $this->get_installed_version( $_GET['wpas-ptype'], $_GET['wpas-token'] ) ) {
+                    $this->output['head'] .= "WPAPPSTORE.INSTALLED_VERSION = '" . addslashes( $version ) . "'; ";
+                }
+                $this->output['head'] .= "</script>";
+            }
+        }
+        else {
+            $this->output['body'] .= $this->view->get( 'communication-error' );
+        }
     }
     
-    function handle_action() {
-        if ( !isset( $_GET['wpas-action'] ) || !$_GET['wpas-action'] ) return false;
-        $method = 'action_' . str_replace( '-', '_', $_GET['wpas-action'] );
+    function api_url() {
+        $qs = remove_query_arg( 'page', $_SERVER['QUERY_STRING'] );
+        $qs = add_query_arg( 'wpas-page', $_GET['page'], $qs );
+        return $this->api_url . '/?' . ltrim( $qs, '?' );
+    }
+    
+    function api_args() {
+        $args['sslverify'] = false;
+
+        $wpas_version = $this->get_installed_version( 'plugin', $this->upgrade_token );
+        if ( $wpas_version ) {
+            $wpas_version = ' WPAppStore/' . $wpas_version;
+        }
+        
+        $args['headers'] = array(
+            'Referer' => $this->current_url(),
+            'User-Agent' => 'PHP/' . PHP_VERSION . ' WordPress/' . get_bloginfo( 'version' ) . $wpas_version
+        );
+        
+        return $args;
+    }
+    
+    function api_post( $url, $body ) {
+        $args = $this->api_args();
+        $args['body'] = $body;
+        
+        $data = wp_remote_post( $url, $args );
+        
+        //print_r($data);
+        
+        if ( !is_wp_error( $data ) && 200 == $data['response']['code'] && $data = json_decode( $data['body'], true ) ) {
+            return $data;
+        }
+        
+        return false;
+    }
+    
+    function api_get( $url ) {
+        $args = $this->api_args();
+        
+        $data = wp_remote_get( $url, $args );
+        
+        if ( !is_wp_error( $data ) && 200 == $data['response']['code'] && $data = json_decode( $data['body'], true ) ) {
+            return $data;
+        }
+        
+        return false;
+    }
+    
+    function handle_do() {
+        if ( !isset( $_GET['wpas-do'] ) || !$_GET['wpas-do'] ) return false;
+        $method = 'do_' . str_replace( '-', '_', $_GET['wpas-do'] );
         if ( method_exists( $this, $method ) ) {
             call_user_method( $method, $this );
             return true;
         }
     }
     
+    function get_menu() {
+        $menu = get_site_transient( 'wpas_menu' );
+        if ( $menu ) return $menu;
+        
+        // Let's refresh the menu
+        $url = 'http://s3.amazonaws.com/wpappstore.com/client-menu.json';
+        $data = wp_remote_get( $url );
+    
+        if ( !is_wp_error( $data ) && 200 == $data['response']['code'] ) {
+            $menu = json_decode( $data['body'], true );
+        }
+        
+        // Try retrieve a backup from the last refresh time
+        if ( !$menu ) {
+            $menu = get_option( 'wpas_menu_backup' );
+        }
+
+        // Not even a backup? Yikes, let's use the hardcoded menu
+        if ( !$menu ) {
+            $menu = array(
+                'slug' => 'wp-app-store',
+                'title' => 'WP App Store',
+                'subtitle' => 'Home',
+                'position' => 999,
+                'submenu' => array(
+                    'wp-app-store-themes' => 'Themes',
+                    'wp-app-store-plugins' => 'Plugins'
+                )
+            );
+        }
+        
+        set_site_transient( 'wpas_menu', $menu, 60*60*24 );
+        update_option( 'wpas_menu_backup', $menu );
+        
+        return $menu;
+    }
+    
     function admin_menu() {
-        add_menu_page( $this->title, __( 'WP App Store', 'wp-app-store' ), 'install_themes', $this->slug, array( $this, 'page_home' ) );
-        add_submenu_page( $this->slug, __( 'Themes', 'wp-app-store' ) . ' &lsaquo; ' . $this->title, __( 'Themes', 'wp-app-store' ), 'install_themes', $this->slug . '-themes', array( $this, 'page_product_archive' ) );
-        add_submenu_page( $this->slug, __( 'Plugins', 'wp-app-store' ) . ' &lsaquo; ' . $this->title, __( 'Plugins', 'wp-app-store' ), 'install_themes', $this->slug . '-plugins', array( $this, 'page_product_archive' ) );
+        $menu = $this->get_menu();
+        
+        add_menu_page( $menu['title'], $menu['title'], 'install_themes', $menu['slug'], array( $this, 'render_page' ), null, $menu['position'] );
+
+        foreach ( $menu['submenu'] as $slug => $title ) {
+            add_submenu_page( $menu['slug'], $title . ' &lsaquo; ' . $menu['title'], $title, 'install_themes', $slug, array( $this, 'render_page' ) );
+        }
 
         global $submenu;
-        $submenu[$this->slug][0][0] = __( 'Home', 'wp-app-store' );
-
+        $submenu[$this->slug][0][0] = $menu['subtitle'];
+        
         add_action( 'admin_print_styles', array( $this, 'enqueue_styles' ) );
-        add_action( 'admin_print_scripts', array( $this, 'enqueue_scripts' ) );
+        add_action( 'admin_head', array( $this, 'admin_head' ) );
+    }
+    
+    function admin_head() {
+        if ( !isset( $this->output['head'] ) ) return;
+        echo $this->output['head'];
+    }
+    
+    function is_wpas_page() {
+        return ( isset( $_GET['page'] ) && preg_match( '@^' . $this->slug . '@', $_GET['page'] ) );
     }
     
     function enqueue_styles() {
         wp_enqueue_style( $this->slug . '-global', $this->css_url . '/global.css' );
-        if ( !isset( $_GET['page'] ) || !preg_match( '@^' . $this->slug . '@', $_GET['page'] ) ) return;
-        wp_enqueue_style( $this->slug, $this->css_url . '/styles.css' );
-        wp_enqueue_style( 'prettyPhoto', $this->css_url . '/prettyPhoto.css' );
+        if ( !$this->is_wpas_page() ) return;
         add_thickbox();
         wp_enqueue_script( 'theme-preview' );
         wp_enqueue_script( 'theme' );
     }
     
-    function enqueue_scripts() {
-        if ( !isset( $_GET['page'] ) || !preg_match( '@^' . $this->slug . '@', $_GET['page'] ) ) return;
-        wp_enqueue_script( $this->slug, $this->js_url . '/script.js', array( 'jquery' ) );
-        wp_enqueue_script( 'prettyPhoto', $this->js_url . '/jquery.prettyPhoto.js', array( 'jquery' ) );
-    }
-    
-    function api_request( $url, $use_cookie = false ) {
-        $args = array(
-            'sslverify' => false
-        );
-        
-        if ( $use_cookie ) {
-            $args['cookies'] = array( new WP_Http_Cookie( $this->get_setting( 'cookie' ) ) );
-        }
-        
-        $data = wp_remote_get( $url, $args );
-
-        if ( is_wp_error( $data ) ) return false;
-        
-        $data = json_decode( $data['body'] );
-        
-        if ( isset( $data->user ) ) {
-            $this->user = $data->user;
-        }
-        
-        return $data;
-    }
-    
-    function page_home() {
-        if ( !defined( 'WPAPPSTORE_PRELAUNCH' ) ) {
-            $this->view->render( 'launching' );
-            return;
-        }
-
-        if ( $this->handle_action() ) return;
-        
-        $data = $this->api_request( $this->api_url . '/home/' );
-        
-        if ( $data ) {
-            extract( get_object_vars( $data ) );
-        }
-        
-        $this->view->render( 'home', compact( 'themes', 'plugins' ) );
-    }
-    
-    function page_product_archive() {
-        if ( !defined( 'WPAPPSTORE_PRELAUNCH' ) ) {
-            $this->view->render( 'launching' );
-            return;
-        }
-
-        $type = ( preg_match( '@-themes$@', $_GET['page'] ) ) ? 'themes' : 'plugins';
-        
-        $url = $this->api_url . '/' . $type . '/';
-        
-        $query_vars = array();
-        foreach ( array( 'categories', 'publishers' ) as $key ) {
-            if ( !isset( $_GET['wpas-' . $key] ) || !is_array( $_GET['wpas-' . $key] ) ) continue;
-            $query_vars[] = $key . ':' . implode( ',', $_GET['wpas-' . $key] );
-        }
-        
-        if ( !empty( $query_vars ) ) {
-            $url .= implode( '+', $query_vars ) . '/';
-        }
-
-        if ( isset( $_GET['wpas-page'] ) ) $url .= 'page/' . urlencode( $_GET['wpas-page'] ) . '/';
-        
-        $data = $this->api_request( $url );
-        
-        if ( $data ) {
-            extract( get_object_vars( $data ) );
-        }
-        
-        if ( 'themes' == $type ) {
-            $page_title = __( 'Themes', 'wp-app-store' );
-            $mailing_list_id = 'dkkui';
+    function get_installed_version( $product_type, $token ) {
+        if ( 'theme' == $product_type ) {
+            $products = get_themes();
         }
         else {
-            $page_title = __( 'Plugins', 'wp-app-store' );
-            $mailing_list_id = 'dkkud';
+            $products = get_plugins();
         }
         
-        $this->view->render( 'archive-product', compact( 'categories', 'publishers', 'items', 'paging', 'page_title', 'mailing_list_id' ) );
-    }
-    
-    function action_purchases() {
-        $url = $this->api_url . '/purchases/';
-        if ( isset( $_GET['wpas-page'] ) ) $url .= 'page/' . urlencode( $_GET['wpas-page'] ) . '/';
-        $data = $this->api_request( $url, true );
-        
-        if ( $data ) {
-            extract( get_object_vars( $data ) );
-        }
-
-        if ( $error ) {
-            $this->view->render( 'purchases-error', compact( 'error' ) );
-            return false;
+        if ( isset( $products[$token]['Version'] ) ) {
+            return $products[$token]['Version'];
         }
         
-        $this->view->render( 'purchases', compact( 'items', 'paging' ) );
-    }
-    
-    function action_bonuses() {
-        $url = $this->api_url . '/bonuses/';
-        if ( isset( $_GET['wpas-page'] ) ) $url .= 'page/' . urlencode( $_GET['wpas-page'] ) . '/';
-        $data = $this->api_request( $url, true );
-        
-        if ( $data ) {
-            extract( get_object_vars( $data ) );
-        }
-
-        if ( $error ) {
-            $this->view->render( 'bonuses-error', compact( 'error' ) );
-            return false;
-        }
-        
-        $this->view->render( 'bonuses', compact( 'items', 'paging' ) );
-    }
-    
-    function action_view_product() {
-        $pid = $_GET['wpas-pid'];
-        
-        if ( 'theme' == $_GET['wpas-ptype'] ) {
-            $ptype = 'theme';
-        }
-        else {
-            $ptype = 'plugin';
-        }
-
-        $data = $this->api_request( $this->api_url . '/' . $ptype . '/' . urlencode( $pid ) . '/' );
-
-        if ( $data ) {
-            extract( get_object_vars( $data ) );
-        }
-        
-        $this->view->render( 'single-product', compact( 'product', 'is_purchased', 'is_bonus_applicable' ) );
-    }
-    
-    function action_login() {
-        $this->update_setting( 'cookie', $_GET['wpas-cookie'] );
-        wp_redirect( $_GET['wpas-redirect'] );
-        exit;
-    }
-    
-    function action_logout() {
-        $this->update_setting( 'cookie', '' );
-        wp_redirect( $this->home_url );
-        exit;
+        return false;
     }
 
-    function action_install( $is_upgrade = false ) {
+    function render_page() {
+        echo $this->output['body'];
+    }
+    
+    function do_install( $is_upgrade = false ) {
         $pid = $_GET['wpas-pid'];
         
         if ( 'theme' == $_GET['wpas-ptype'] ) {
@@ -302,7 +322,8 @@ class WP_App_Store {
             $ptype = 'plugin';
         }
         
-        $data = $this->api_request( $this->api_url . '/' . $ptype . '/install/' . urlencode( $pid ) . '/', true );
+        $url = $this->api_url();
+        $data = $this->api_get( $url );
 
         if ( $data ) {
             extract( get_object_vars( $data ) );
@@ -349,8 +370,8 @@ class WP_App_Store {
         }
     }
     
-    function action_upgrade() {
-        $this->action_install( true );
+    function do_upgrade() {
+        $this->do_install( true );
     }
 
 }

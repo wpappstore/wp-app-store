@@ -22,5 +22,4 @@ if ( version_compare( PHP_VERSION, '5.2', '<' ) ) {
 
 require 'lib/wp-app-store.php' ;
 
-global $wp_app_store;
-$wp_app_store = new WP_App_Store( __FILE__ );
+new WP_App_Store( __FILE__ );
