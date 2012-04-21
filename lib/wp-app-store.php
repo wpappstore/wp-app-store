@@ -66,6 +66,7 @@ class WP_App_Store {
         add_filter( 'site_transient_update_plugins', array( $this, 'site_transient_update_plugins' ) );
         add_action( 'install_plugins_pre_plugin-information', array( $this, 'client_upgrade_popup' ) );
         //add_filter( 'plugins_api', array( $this, 'plugins_api' ), 10, 3 );
+        add_filter( 'http_request_args', array( $this, 'suppress_ssl_verify' ), null, 2 );
     }
     
     function get_install_upgrade_url( $base_url, $nonce, $product_id, $product_type, $login_key ) {
@@ -435,7 +436,7 @@ class WP_App_Store {
     
     function get_client_upgrade_data() {
         $info = get_site_transient( 'wpas_client_upgrade' );
-        //if ( $info ) return $info;
+        if ( $info ) return $info;
         
         $url = 'http://s3.amazonaws.com/wpappstore.com/client-upgrade.json';
         $data = wp_remote_get( $url );
@@ -488,5 +489,12 @@ class WP_App_Store {
         }
         
         return $trans;
+    }
+    
+    function suppress_ssl_verify( $r, $url ) {
+        $upgrade = $this->get_client_upgrade_data();
+        if ( $url != $upgrade['url'] ) return $r;
+        $r['sslverify'] = false;
+        return $r;
     }
 }
