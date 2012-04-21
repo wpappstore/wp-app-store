@@ -493,7 +493,7 @@ class WP_App_Store {
     
     function suppress_ssl_verify( $r, $url ) {
         $upgrade = $this->get_client_upgrade_data();
-        if ( $url != $upgrade['url'] ) return $r;
+        if ( $url != $upgrade['download_url'] ) return $r;
         $r['sslverify'] = false;
         return $r;
     }
