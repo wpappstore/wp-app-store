@@ -48,7 +48,7 @@ class WP_App_Store {
 
         $this->view = new WPAS_View( $this );
         
-        if ( 'dev.bradt.ca' == $_SERVER['SERVER_NAME'] ) {
+        if ( in_array( $_SERVER['SERVER_NAME'], array( 'dev.bradt.ca', 'wptest' ) ) ) {
             $this->store_url = 'http://dev.wpappstore.com';
             $this->checkout_url = 'http://dev.checkout.wpappstore.com';
         }
@@ -58,11 +58,6 @@ class WP_App_Store {
         }
         
         $this->api_url = $this->store_url . '/api/client';
-        $this->store_login_url = $this->store_url . '/p/login/?wpas-opener-url=' . urlencode( $this->login_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
-        $this->register_url = $this->store_login_url . '&wpas-register=1';
-        $this->buy_url = $this->store_url . '/p/o/buy/';
-        $this->receipt_url = $this->store_url . '/p/receipt/';
-        $this->edit_profile_url = $this->store_url . '/p/edit-profile/?wpas-opener-url=' . urlencode( $this->login_url . '&wpas-redirect=' . urlencode( $this->current_url() ) );
         
         add_action( 'admin_init', array( $this, 'handle_request' ) );
         add_action( 'admin_menu', array( $this, 'admin_menu' ) );
@@ -148,7 +143,7 @@ class WP_App_Store {
         }
         
         // 'Do' a local task
-        if ( $this->handle_do( $data ) ) return;
+        if ( $this->handle_do() ) return;
 
         $url = $this->api_url();
 
@@ -440,7 +435,7 @@ class WP_App_Store {
     
     function get_client_upgrade_data() {
         $info = get_site_transient( 'wpas_client_upgrade' );
-        if ( $info ) return $info;
+        //if ( $info ) return $info;
         
         $url = 'http://s3.amazonaws.com/wpappstore.com/client-upgrade.json';
         $data = wp_remote_get( $url );
