@@ -1,47 +1,18 @@
 <?php
 class WPAS_Theme_Upgrader_Skin extends Theme_Installer_Skin {
-    public $wpas_view = null;
-	public $wpas_product = null;
+    public $wpas_header = '';
+	public $wpas_footer = '';
 
 	function header() {
 		if ( $this->done_header )
 			return;
 		$this->done_header = true;
-
-        $this->wpas_view->header();
 		
-		if ( $this->wpas_is_upgrade ) {
-			$action = __( 'Upgrading', 'wp-app-store' );
-		}
-		else {
-			$action = __( 'Installing', 'wp-app-store' );
-		}
-
-		$product = $this->wpas_product;
-		?>
-		
-		<div class="installing">
-	
-			<img class="featured-image" src="<?php echo $product->image->src; ?>" alt="<?php echo esc_attr( $product->title ); ?>" />
-			
-			<div class="details">
-	
-				<div class="section-title">
-					<h3><?php echo $action, ' ', __( 'Theme', 'wp-app-store' ), ': ', $product->title; ?></h3>
-				</div>
-		
-		<?php
+		echo $this->wpas_header;
 	}
 	
     function footer() {
-		?>
-		
-			</div>
-		
-		</div>
-		
-		<?php
-		$this->wpas_view->footer();
+		echo $this->wpas_footer;
 	}
 
 	function after() {

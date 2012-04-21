@@ -21,6 +21,8 @@ class WP_App_Store {
     public $user = null;
     public $view = null;
     
+    public $run_installer = null;
+    
     public $output = array(
         'head' => '',
         'body' => ''
@@ -64,20 +66,25 @@ class WP_App_Store {
         
         add_action( 'admin_init', array( $this, 'handle_request' ) );
         add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+        
+        // Plugin upgrade hooks
+        add_filter( 'site_transient_update_plugins', array( $this, 'site_transient_update_plugins' ) );
+        add_action( 'install_plugins_pre_plugin-information', array( $this, 'client_upgrade_popup' ) );
+        //add_filter( 'plugins_api', array( $this, 'plugins_api' ), 10, 3 );
     }
     
-    function get_install_upgrade_url( $base_url, $nonce ) {
-        return $base_url . '&wpas-pid=' . urlencode( $_GET['wpas-pid'] ) . '&wpas-ptype=' . urlencode( $_GET['wpas-ptype'] ) . '&_nonce=' . urlencode( $nonce );
+    function get_install_upgrade_url( $base_url, $nonce, $product_id, $product_type, $login_key ) {
+        return $base_url . '&wpas-pid=' . urlencode( $product_id ) . '&wpas-ptype=' . urlencode( $product_type ) . '&_wpnonce=' . urlencode( $nonce ) . '&wpas-key=' . urlencode( $login_key );
     }
     
-    function get_upgrade_url() {
-        $nonce = $this->create_nonce( 'upgrade', $_GET['wpas-ptype'], $_GET['wpas-token'] );
-        return $this->get_install_upgrade_url( $this->upgrade_url, $nonce );
+    function get_upgrade_url( $product_type, $token, $product_id, $login_key ) {
+        $nonce = $this->create_nonce( 'upgrade', $product_type, $token );
+        return $this->get_install_upgrade_url( $this->upgrade_url, $nonce, $product_id, $product_type, $login_key );
     }
     
-    function get_install_url() {
-        $nonce = $this->create_nonce( 'install', $_GET['wpas-ptype'], $_GET['wpas-token'] );
-        return $this->get_install_upgrade_url( $this->install_url, $nonce );
+    function get_install_url( $product_type, $token, $product_id, $login_key ) {
+        $nonce = $this->create_nonce( 'install', $product_type, $token );
+        return $this->get_install_upgrade_url( $this->install_url, $nonce, $product_id, $product_type, $login_key );
     }
     
     function current_url() {
@@ -90,6 +97,22 @@ class WP_App_Store {
         return wp_create_nonce( 'wpas-' . $action . '-' . $type . '-' . $token );
     }
     
+    // Themes are keyed by theme name instead of their directory name,
+    // need to re-key 'em
+    function get_themes() {
+        $result = array();
+        $themes = get_themes();
+        foreach ( $themes as $theme ) {
+            $key = $theme['Stylesheet'];
+            $result[$key] = $theme;
+        }
+        return $result;
+    }
+    
+    function get_plugins() {
+        return get_plugins();
+    }
+    
     function get_purchase_tokens_data() {
         $url = $this->api_url . '/user/purchase-tokens/';
         $url = add_query_arg( 'wpas-key', $_GET['wpas-key'], $url );
@@ -98,19 +121,22 @@ class WP_App_Store {
             return array();
         }
         
+        $results = array();
         foreach ( $product_types as $type => $tokens ) {
-            $products = call_user_func( 'get_' . $type . 's' );
-            $nonces[$type] = array();
-            $installed_versions[$type] = array();
-            foreach ( $tokens as $token ) {
-                $nonces[$type][$token] = $this->create_nonce( 'install', $type, $token );
+            $products = call_user_method( 'get_' . $type . 's', $this );
+            foreach ( $tokens as $product_id => $token ) {
+                $result = array(
+                    'install_url' => $this->get_install_url( $type, $token, $product_id, $_GET['wpas-key'] ),
+                    'upgrade_url' => $this->get_install_url( $type, $token, $product_id, $_GET['wpas-key'] )
+                );
                 if ( isset( $products[$token]['Version'] ) ) {
-                    $installed_versions[$type][$token] = $products[$token]['Version'];
+                    $result['installed_version'] = $products[$token]['Version'];
                 }
+                $results[$type][$product_id] = $result;
             }
         }
         
-        return compact( 'nonces', 'installed_versions' );
+        return array( 'wpas-products' => $results );
     }
     
     function handle_request() {
@@ -145,14 +171,13 @@ class WP_App_Store {
                 $this->output['head'] .= $data['head'];
             }
         
-            if ( isset( $_GET['wpas-ptype'] ) && isset( $_GET['wpas-token'] ) ) {
+            if ( isset( $_GET['wpas-token'] ) && isset( $_GET['wpas-pid']) && isset( $_GET['wpas-ptype'] ) ) {
                 $this->output['head'] .= "
                     <script>
-                    WPAPPSTORE.PRODUCT_TOKEN = '" . addslashes( $_GET['wpas-token'] ) . "';
                     WPAPPSTORE.PRODUCT_TYPE = '" . addslashes( $_GET['wpas-ptype'] ) . "';
                     WPAPPSTORE.PRODUCT_ID = '" . addslashes( $_GET['wpas-pid'] ) . "';
-                    WPAPPSTORE.INSTALL_URL = '" . addslashes( $this->get_install_url() ) . "';
-                    WPAPPSTORE.UPGRADE_URL = '" . addslashes( $this->get_upgrade_url() ) . "';
+                    WPAPPSTORE.INSTALL_URL = '" . addslashes( $this->get_install_url( $_GET['wpas-ptype'], $_GET['wpas-token'], $_GET['wpas-pid'], '' ) ) . "';
+                    WPAPPSTORE.UPGRADE_URL = '" . addslashes( $this->get_upgrade_url( $_GET['wpas-ptype'], $_GET['wpas-token'], $_GET['wpas-pid'], '' ) ) . "';
                 ";
                 if ( $version = $this->get_installed_version( $_GET['wpas-ptype'], $_GET['wpas-token'] ) ) {
                     $this->output['head'] .= "WPAPPSTORE.INSTALLED_VERSION = '" . addslashes( $version ) . "'; ";
@@ -161,8 +186,17 @@ class WP_App_Store {
             }
         }
         else {
-            $this->output['body'] .= $this->view->get( 'communication-error' );
+            $this->output['body'] .= $this->get_communication_error();
         }
+    }
+    
+    function get_communication_error() {
+        ob_start();
+        ?>
+        <h2>Communication Error</h2>
+        <p><?php _e( 'Sorry, we could not reach the WP App Store. Please try again.' ); ?></p>
+        <?php
+        return ob_get_clean();
     }
     
     function api_url() {
@@ -206,6 +240,8 @@ class WP_App_Store {
         $args = $this->api_args();
         
         $data = wp_remote_get( $url, $args );
+
+        //print_r($data);
         
         if ( !is_wp_error( $data ) && 200 == $data['response']['code'] && $data = json_decode( $data['body'], true ) ) {
             return $data;
@@ -309,6 +345,17 @@ class WP_App_Store {
     }
 
     function render_page() {
+        if ( !is_null( $this->run_installer ) ) {
+            extract( $this->run_installer );
+            if ( $is_upgrade ) {
+                $upgrader->upgrade( $download_url );
+            }
+            else {
+                $upgrader->install( $download_url );
+            }
+            return;
+        }
+        
         echo $this->output['body'];
     }
     
@@ -324,16 +371,21 @@ class WP_App_Store {
         
         $url = $this->api_url();
         $data = $this->api_get( $url );
+        
+        if ( !$data ) {
+            $this->output['body'] .= $this->get_communication_error();
+            return;
+        }
 
-        if ( $data ) {
-            extract( get_object_vars( $data ) );
+        if ( isset( $data['head'] ) ) {
+            $this->output['head'] .= $data['head'];
         }
         
-        if ( $error ) {
-            $this->view->render( 'install-error', compact( 'error' ) );
-            return false;
+        if ( isset( $data['error'] ) ) {
+            $this->output['body'] .= $data['body'];
+            return;
         }
-
+        
         require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
         
         if ( $ptype == 'theme' ) {
@@ -343,9 +395,8 @@ class WP_App_Store {
             require_once 'theme-upgrader.php';
             
             $skin = new WPAS_Theme_Upgrader_Skin( compact( 'type', 'title', 'nonce', 'url' ) );
-            $skin->wpas_view = $this->view;
-            $skin->wpas_product = $product;
-            $skin->wpas_is_upgrade = $is_upgrade;
+            $skin->wpas_header = isset( $data['body_header'] ) ? $data['body_header'] : '';
+            $skin->wpas_footer = isset( $data['body_footer'] ) ? $data['body_footer'] : '';
             $upgrader = new WPAS_Theme_Upgrader( $skin );
         }
         else {
@@ -355,23 +406,92 @@ class WP_App_Store {
             require_once 'plugin-upgrader.php';
             
             $skin = new WPAS_Plugin_Upgrader_Skin( compact( 'type', 'title', 'nonce', 'url' ) );
-            $skin->wpas_view = $this->view;
-            $skin->wpas_product = $product;
-            $skin->wpas_is_upgrade = $is_upgrade;
+            $skin->wpas_header = isset( $data['body_header'] ) ? $data['body_header'] : '';
+            $skin->wpas_footer = isset( $data['body_footer'] ) ? $data['body_footer'] : '';
             $upgrader = new WPAS_Plugin_Upgrader( $skin );
         }
         
-        //$product->download_url = '/Users/bradt/Downloads/swatch.zip';
-        if ( $is_upgrade ) {
-            $upgrader->upgrade( $product->download_url );
-        }
-        else {
-            $upgrader->install( $product->download_url );
-        }
+        $this->run_installer = array(
+            'upgrader' => $upgrader,
+            'download_url' => $data['download_url'],
+            'is_upgrade' => $is_upgrade
+        );
     }
     
     function do_upgrade() {
         $this->do_install( true );
     }
+    
+    function client_upgrade_popup() {
+        if ( $this->slug != $_GET['plugin'] ) return;
+        
+        $url = 'http://s3.amazonaws.com/wpappstore.com/client-upgrade-popup.html';
+        $data = wp_remote_get( $url );
+    
+        if ( is_wp_error( $data ) || 200 != $data['response']['code'] ) {
+            echo '<p>Could not retrieve version details. Please try again.</p>';
+        }
+        else {
+            echo $data['body'];
+        }
+        
+        exit;
+    }
+    
+    function get_client_upgrade_data() {
+        $info = get_site_transient( 'wpas_client_upgrade' );
+        if ( $info ) return $info;
+        
+        $url = 'http://s3.amazonaws.com/wpappstore.com/client-upgrade.json';
+        $data = wp_remote_get( $url );
+    
+        if ( !is_wp_error( $data ) && 200 == $data['response']['code'] ) {
+            if ( $info = json_decode( $data['body'], true ) ) {
+                set_site_transient( 'wpas_client_upgrade', $info, 60*60*24 );
+                return $info;
+            }
+        }
+        
+        return false;
+    }
 
+    // Used by WP Core to get this plugin's version and download link for
+    // automatic upgrades
+    function plugin_api( $api, $action, $args ) {
+        if ( 'plugin_information' != $action || false === $api ) return $api;
+        
+        $upgrade = $this->get_client_upgrade_data();
+        $menu = $this->get_menu();
+
+        if ( $upgrade && $menu ) {
+            $api = new stdClass();
+            $api->name = $menu['title'];
+            $api->version = $upgrade['version'];
+            $api->download_link = $upgrade['download_url'];
+            return $api;
+        }
+        
+        return new WP_Error( 'plugins_api_failed', 'Could not retrieve plugin upgrade information.' );
+    }
+    
+    // When WP checks for upgrades to it's WP.org plugins and sets the
+    // 'update_plugins' transient, we check for an update for this plugin and
+    // add it in if there is one, sneaky!
+    function site_transient_update_plugins( $trans ) {
+        $data = $this->get_client_upgrade_data();
+        if ( !$data ) return $trans;
+        
+        $ut = $this->upgrade_token;
+        $installed_version = $this->get_installed_version( 'plugin', $ut );
+        
+        if ( version_compare( $installed_version, $data['version'], '<' ) ) {
+            $trans->response[$ut]->url = 'https://wpappstore.com';
+            $trans->response[$ut]->slug = $this->slug;
+            $trans->response[$ut]->package = $data['download_url'];
+            $trans->response[$ut]->new_version = $data['version'];
+            $trans->response[$ut]->id = '0';
+        }
+        
+        return $trans;
+    }
 }
