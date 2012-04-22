@@ -1,5 +1,24 @@
 <?php
-require 'view.php';
+/*
+Plugin Name: WP App Store
+Plugin URI: http://wpappstore.com/
+Description: Purchase & install themes and plugins from top brands directly from your WordPress dashboard.
+Author: WP App Store Inc.
+Author URI: http://wpappstore.com/
+Version: 0.9
+License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+*/
+
+if ( version_compare( PHP_VERSION, '5.2', '<' ) ) {
+    // Thanks for this Yoast!
+	if ( is_admin() && ( !defined( 'DOING_AJAX' ) || !DOING_AJAX ) ) {
+		require_once ABSPATH.'/wp-admin/includes/plugin.php';
+		deactivate_plugins( __FILE__ );
+	    wp_die( __('WP App Store requires PHP 5.2 or higher, as does WordPress 3.2 and higher. The plugin has now disabled itself.', 'wp-app-store' ) );
+	} else {
+		return;
+	}
+}
 
 class WP_App_Store {
     public $dir_path = '';
@@ -125,7 +144,7 @@ class WP_App_Store {
         if ( !$this->is_wpas_page() ) return;
         
         if ( !defined( 'WPAPPSTORE_PRELAUNCH' ) ) {
-            $this->output['body'] .= $this->view->get( 'launching' );
+            $this->output['body'] .= $this->get_prelaunch_html();
             return;
         }
         
@@ -172,11 +191,28 @@ class WP_App_Store {
         }
     }
     
+    function get_prelaunch_html() {
+        ob_start();
+        ?>
+        <div class="wrap" style="margin: 200px; background-color: lightYellow; border: 1px solid #E6DB55; padding: 0.4em 2em; text-align: center;">
+            <h2>Launching April 2012</h2>
+            <p style="font-size: 14px; line-height: 1.4em;">
+                We are still preparing for launch. Sign up to our mailing list at
+                <a href="http://wpappstore.com/">wpappstore.com</a> to be notified when
+                we launch.
+            </p>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    
     function get_communication_error() {
         ob_start();
         ?>
-        <h2>Communication Error</h2>
-        <p><?php _e( 'Sorry, we could not reach the WP App Store. Please try again.' ); ?></p>
+        <div class="wrap">
+            <h2>Communication Error</h2>
+            <p><?php _e( 'Sorry, we could not reach the WP App Store. Please try again.' ); ?></p>
+        </div>
         <?php
         return ob_get_clean();
     }
@@ -477,3 +513,5 @@ class WP_App_Store {
         return $trans;
     }
 }
+
+new WP_App_Store( __FILE__ );
