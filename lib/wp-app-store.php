@@ -109,7 +109,7 @@ class WP_App_Store {
             foreach ( $tokens as $product_id => $token ) {
                 $result = array(
                     'install_url' => $this->get_install_url( $type, $token, $product_id, $_GET['wpas-key'] ),
-                    'upgrade_url' => $this->get_install_url( $type, $token, $product_id, $_GET['wpas-key'] )
+                    'upgrade_url' => $this->get_upgrade_url( $type, $token, $product_id, $_GET['wpas-key'] )
                 );
                 if ( isset( $products[$token]['Version'] ) ) {
                     $result['installed_version'] = $products[$token]['Version'];
@@ -313,10 +313,10 @@ class WP_App_Store {
     
     function get_installed_version( $product_type, $token ) {
         if ( 'theme' == $product_type ) {
-            $products = get_themes();
+            $products = $this->get_themes();
         }
         else {
-            $products = get_plugins();
+            $products = $this->get_plugins();
         }
         
         if ( isset( $products[$token]['Version'] ) ) {

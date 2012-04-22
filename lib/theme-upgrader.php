@@ -35,7 +35,7 @@ class WPAS_Theme_Upgrader extends Theme_Upgrader {
 						'clear_destination' => true,
 						'clear_working' => true,
 						'hook_extra' => array(
-											'theme' => $theme
+											
 											)
 						);
 
