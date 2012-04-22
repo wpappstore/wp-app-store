@@ -5,21 +5,16 @@ class WP_App_Store {
     public $dir_path = '';
     public $basename = '';
     public $dir_url = '';
-    public $asset_url = '';
-    public $css_url = '';
-    public $js_url = '';
     
     public $admin_url = '';
     public $home_url = '';
+    public $install_url = '';
+    public $upgrade_url = '';
+    public $api_url;
+    public $cdn_url;
     
-    public $title = '';
-
-    public $prefix = 'wpas';
     public $slug = 'wp-app-store';
     public $upgrade_token = 'wp-app-store/wp-app-store.php';
-    
-    public $user = null;
-    public $view = null;
     
     public $run_installer = null;
     
@@ -32,32 +27,20 @@ class WP_App_Store {
         $this->dir_path = dirname( $path );
         $this->basename = plugin_basename( $this->dir_path );
         $this->dir_url = trailingslashit( WP_PLUGIN_URL ) . $this->basename;
-        $this->asset_url = $this->dir_url . '/asset';
-        $this->css_url = $this->asset_url . '/css';
-        $this->img_url = $this->asset_url . '/img';
-        $this->js_url = $this->asset_url . '/js';
         
         $this->admin_url = admin_url( 'admin.php' );
         $this->home_url = $this->admin_url . '?page=' . $this->slug;
-        $this->themes_url = $this->admin_url . '?page=' . $this->slug . '-themes';
-        $this->plugins_url = $this->admin_url . '?page=' . $this->slug . '-plugins';
         $this->install_url = $this->home_url . '&wpas-do=install';
         $this->upgrade_url = $this->home_url . '&wpas-do=upgrade';
-       
-        $this->title = __( 'WP App Store', 'wp-app-store' );
-
-        $this->view = new WPAS_View( $this );
         
-        if ( in_array( $_SERVER['SERVER_NAME'], array( 'dev.bradt.ca', 'wptest' ) ) ) {
-            $this->store_url = 'http://dev.wpappstore.com';
-            $this->checkout_url = 'http://dev.checkout.wpappstore.com';
+        if ( defined( 'WPAS_API_URL' ) ) {
+            $this->api_url = WPAS_API_URL;
         }
         else {
-            $this->store_url = 'https://wpappstore.com';
-            $this->checkout_url = 'https://checkout.wpappstore.com';
+            $this->api_url = 'https://wpappstore.com/api/client';
         }
         
-        $this->api_url = $this->store_url . '/api/client';
+        $this->cdn_url = 'http://s3.amazonaws.com/wpappstore.com';
         
         add_action( 'admin_init', array( $this, 'handle_request' ) );
         add_action( 'admin_menu', array( $this, 'admin_menu' ) );
@@ -259,7 +242,7 @@ class WP_App_Store {
         if ( $menu ) return $menu;
         
         // Let's refresh the menu
-        $url = 'http://s3.amazonaws.com/wpappstore.com/client-menu.json';
+        $url = $this->cdn_url . '/client/menu.json';
         $data = wp_remote_get( $url );
     
         if ( !is_wp_error( $data ) && 200 == $data['response']['code'] ) {
@@ -317,7 +300,7 @@ class WP_App_Store {
     }
     
     function enqueue_styles() {
-        wp_enqueue_style( $this->slug . '-global', $this->css_url . '/global.css' );
+        wp_enqueue_style( $this->slug . '-global', $this->cdn_url . '/asset/css/client-global.css' );
         if ( !$this->is_wpas_page() ) return;
         add_thickbox();
         wp_enqueue_script( 'theme-preview' );
@@ -420,7 +403,7 @@ class WP_App_Store {
     function client_upgrade_popup() {
         if ( $this->slug != $_GET['plugin'] ) return;
         
-        $url = 'http://s3.amazonaws.com/wpappstore.com/client-upgrade-popup.html';
+        $url = $this->cdn_url . '/client/upgrade-popup.html';
         $data = wp_remote_get( $url );
     
         if ( is_wp_error( $data ) || 200 != $data['response']['code'] ) {
@@ -437,7 +420,7 @@ class WP_App_Store {
         $info = get_site_transient( 'wpas_client_upgrade' );
         //if ( $info ) return $info;
         
-        $url = 'http://s3.amazonaws.com/wpappstore.com/client-upgrade.json';
+        $url = $this->cdn_url . '/client/upgrade.json';
         $data = wp_remote_get( $url );
     
         if ( !is_wp_error( $data ) && 200 == $data['response']['code'] ) {
