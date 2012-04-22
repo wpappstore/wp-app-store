@@ -66,7 +66,6 @@ class WP_App_Store {
         add_filter( 'site_transient_update_plugins', array( $this, 'site_transient_update_plugins' ) );
         add_action( 'install_plugins_pre_plugin-information', array( $this, 'client_upgrade_popup' ) );
         //add_filter( 'plugins_api', array( $this, 'plugins_api' ), 10, 3 );
-        add_filter( 'http_request_args', array( $this, 'suppress_ssl_verify' ), null, 2 );
     }
     
     function get_install_upgrade_url( $base_url, $nonce, $product_id, $product_type, $login_key ) {
@@ -451,8 +450,7 @@ class WP_App_Store {
         return false;
     }
 
-    // Used by WP Core to get this plugin's version and download link for
-    // automatic upgrades
+    /*
     function plugin_api( $api, $action, $args ) {
         if ( 'plugin_information' != $action || false === $api ) return $api;
         
@@ -469,10 +467,10 @@ class WP_App_Store {
         
         return new WP_Error( 'plugins_api_failed', 'Could not retrieve plugin upgrade information.' );
     }
+    */
     
-    // When WP checks for upgrades to it's WP.org plugins and sets the
-    // 'update_plugins' transient, we check for an update for this plugin and
-    // add it in if there is one, sneaky!
+    // When WP gets the 'update_plugins' transient, we check for an update for
+    // this plugin and add it in if there is one, sneaky!
     function site_transient_update_plugins( $trans ) {
         $data = $this->get_client_upgrade_data();
         if ( !$data ) return $trans;
@@ -489,12 +487,5 @@ class WP_App_Store {
         }
         
         return $trans;
-    }
-    
-    function suppress_ssl_verify( $r, $url ) {
-        $upgrade = $this->get_client_upgrade_data();
-        if ( $url != $upgrade['download_url'] ) return $r;
-        $r['sslverify'] = false;
-        return $r;
     }
 }
