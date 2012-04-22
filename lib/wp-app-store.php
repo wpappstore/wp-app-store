@@ -65,7 +65,7 @@ class WP_App_Store {
         // Plugin upgrade hooks
         add_filter( 'site_transient_update_plugins', array( $this, 'site_transient_update_plugins' ) );
         add_action( 'install_plugins_pre_plugin-information', array( $this, 'client_upgrade_popup' ) );
-        //add_filter( 'plugins_api', array( $this, 'plugins_api' ), 10, 3 );
+        add_filter( 'plugins_api', array( $this, 'plugins_api' ), 10, 3 );
     }
     
     function get_install_upgrade_url( $base_url, $nonce, $product_id, $product_type, $login_key ) {
@@ -435,7 +435,7 @@ class WP_App_Store {
     
     function get_client_upgrade_data() {
         $info = get_site_transient( 'wpas_client_upgrade' );
-        if ( $info ) return $info;
+        //if ( $info ) return $info;
         
         $url = 'http://s3.amazonaws.com/wpappstore.com/client-upgrade.json';
         $data = wp_remote_get( $url );
@@ -450,24 +450,21 @@ class WP_App_Store {
         return false;
     }
 
-    /*
-    function plugin_api( $api, $action, $args ) {
-        if ( 'plugin_information' != $action || false === $api ) return $api;
-        
-        $upgrade = $this->get_client_upgrade_data();
-        $menu = $this->get_menu();
+    // Show compatibility on the core updates page
+    function plugins_api( $api, $action, $args ) {
+        if (
+            'plugin_information' != $action || false !== $api
+            || !isset( $args->slug ) || $this->slug != $args->slug
+        ) return $api;
 
-        if ( $upgrade && $menu ) {
-            $api = new stdClass();
-            $api->name = $menu['title'];
-            $api->version = $upgrade['version'];
-            $api->download_link = $upgrade['download_url'];
-            return $api;
-        }
+        $upgrade = $this->get_client_upgrade_data();
+
+        if ( !$upgrade ) return $api;
         
-        return new WP_Error( 'plugins_api_failed', 'Could not retrieve plugin upgrade information.' );
+        $api = new stdClass();
+        $api->tested = $upgrade['wp_version_tested'];
+        return $api;
     }
-    */
     
     // When WP gets the 'update_plugins' transient, we check for an update for
     // this plugin and add it in if there is one, sneaky!
