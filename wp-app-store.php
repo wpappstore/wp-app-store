@@ -21,10 +21,6 @@ if ( version_compare( PHP_VERSION, '5.2', '<' ) ) {
 }
 
 class WP_App_Store {
-    public $dir_path = '';
-    public $basename = '';
-    public $dir_url = '';
-    
     public $admin_url = '';
     public $home_url = '';
     public $install_url = '';
@@ -42,10 +38,11 @@ class WP_App_Store {
         'body' => ''
     );
     
-    function __construct( $path ) {
-        $this->dir_path = dirname( $path );
-        $this->basename = plugin_basename( $this->dir_path );
-        $this->dir_url = trailingslashit( WP_PLUGIN_URL ) . $this->basename;
+    function __construct() {
+		// Stop if the user doesn't have access to install themes
+		if ( ! current_user_can( 'install_themes' ) ) {
+			return;
+		}
         
         $this->admin_url = admin_url( 'admin.php' );
         $this->home_url = $this->admin_url . '?page=' . $this->slug;
@@ -59,7 +56,7 @@ class WP_App_Store {
             $this->api_url = 'https://wpappstore.com/api/client';
         }
         
-        $this->cdn_url = 'http://s3.amazonaws.com/wpappstore.com';
+        $this->cdn_url = 'http://cdn.wpappstore.com';
         
         add_action( 'admin_init', array( $this, 'handle_request' ) );
         add_action( 'admin_menu', array( $this, 'admin_menu' ) );
@@ -276,7 +273,7 @@ class WP_App_Store {
             return true;
         }
     }
-    
+
     function get_menu() {
         $menu = get_site_transient( 'wpas_menu' );
         if ( $menu ) return $menu;
@@ -291,7 +288,7 @@ class WP_App_Store {
         
         // Try retrieve a backup from the last refresh time
         if ( !$menu ) {
-            $menu = get_option( 'wpas_menu_backup' );
+            $menu = get_site_transient( 'wpas_menu_backup' );
         }
 
         // Not even a backup? Yikes, let's use the hardcoded menu
@@ -309,7 +306,7 @@ class WP_App_Store {
         }
         
         set_site_transient( 'wpas_menu', $menu, 60*60*24 );
-        update_option( 'wpas_menu_backup', $menu );
+        set_site_transient( 'wpas_menu_backup', $menu );
         
         return $menu;
     }
@@ -324,7 +321,8 @@ class WP_App_Store {
         }
 
         global $submenu;
-        $submenu[$this->slug][0][0] = $menu['subtitle'];
+		$slug = $menu['slug'];
+        $submenu[$slug][0][0] = $menu['subtitle'];
         
         add_action( 'admin_print_styles', array( $this, 'enqueue_styles' ) );
         add_action( 'admin_head', array( $this, 'admin_head' ) );
@@ -462,7 +460,7 @@ class WP_App_Store {
     
     function get_client_upgrade_data() {
         $info = get_site_transient( 'wpas_client_upgrade' );
-        //if ( $info ) return $info;
+        if ( $info ) return $info;
         
         $url = $this->cdn_url . '/client/upgrade.json';
         $data = wp_remote_get( $url );
@@ -514,4 +512,8 @@ class WP_App_Store {
     }
 }
 
-new WP_App_Store( __FILE__ );
+function wp_app_store_init() {
+	new WP_App_Store();
+}
+
+add_action( 'init', 'wp_app_store_init' );
