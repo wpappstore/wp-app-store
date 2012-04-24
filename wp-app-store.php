@@ -176,11 +176,21 @@ class WP_App_Store {
 			$head_js = '';
 			
 			$upgrade = $this->get_client_upgrade_data();
-			$installed_version = $this->get_installed_version( 'plugin', $this->upgrade_token );
-			if ( isset( $upgrade['version'] ) && $installed_version && version_compare( $installed_version, $upgrade['version'], '<' ) ) {
+			if ( isset( $upgrade['version'] ) ) {
 				$head_js .= "
 					WPAPPSTORE.CLIENT_LATEST_VERSION = '" . addslashes( $upgrade['version'] ) . "';
+				";
+			}
+			
+			$installed_version = $this->get_installed_version( 'plugin', $this->upgrade_token );
+			if ( $installed_version ) {
+				$head_js .= "
 					WPAPPSTORE.CLIENT_INSTALLED_VERSION = '" . addslashes( $installed_version ) . "';
+				";
+			}
+			
+			if ( isset( $upgrade['version'] ) && $installed_version && version_compare( $installed_version, $upgrade['version'], '<' ) ) {
+				$head_js .= "
 					WPAPPSTORE.CLIENT_UPGRADE_URL = '" . addslashes( $this->get_client_upgrade_url() ) . "';
 				";
 			}
