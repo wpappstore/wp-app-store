@@ -442,8 +442,8 @@ class WP_App_Store {
         if ( $ptype == 'theme' ) {
             require_once ABSPATH . 'wp-admin/includes/theme-install.php';
             
-            require_once 'theme-upgrader-skin.php';
-            require_once 'theme-upgrader.php';
+            require_once 'installer/theme-upgrader-skin.php';
+            require_once 'installer/theme-upgrader.php';
             
             $skin = new WPAS_Theme_Upgrader_Skin( compact( 'type', 'title', 'nonce', 'url' ) );
             $skin->wpas_header = isset( $data['body_header'] ) ? $data['body_header'] : '';
@@ -453,8 +453,8 @@ class WP_App_Store {
         else {
             require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
             
-            require_once 'plugin-upgrader-skin.php';
-            require_once 'plugin-upgrader.php';
+            require_once 'installer/plugin-upgrader-skin.php';
+            require_once 'installer/plugin-upgrader.php';
             
             $skin = new WPAS_Plugin_Upgrader_Skin( compact( 'type', 'title', 'nonce', 'url' ) );
             $skin->wpas_header = isset( $data['body_header'] ) ? $data['body_header'] : '';
