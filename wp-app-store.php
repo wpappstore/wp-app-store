@@ -82,7 +82,7 @@ class WP_App_Store {
     }
 
     function get_client_upgrade_url() {
-        return 'update.php?action=upgrade-plugin&plugin=' . urlencode( $this->upgrade_token ) . '&_wpnonce=' . urlencode( wp_create_nonce( 'upgrade-plugin_wp-app-store' ) );
+        return 'update.php?action=upgrade-plugin&plugin=' . urlencode( $this->upgrade_token ) . '&_wpnonce=' . urlencode( wp_create_nonce( 'upgrade-plugin_' . $this->upgrade_token ) );
     }
     
     function current_url() {
