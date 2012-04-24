@@ -80,6 +80,10 @@ class WP_App_Store {
         $nonce = $this->create_nonce( 'install', $product_type, $product_id );
         return $this->get_install_upgrade_url( $this->install_url, $nonce, $product_id, $product_type, $login_key );
     }
+
+    function get_client_upgrade_url() {
+        return 'update.php?action=upgrade-plugin&plugin=' . urlencode( $this->upgrade_token ) . '&_wpnonce=' . urlencode( wp_create_nonce( 'upgrade-plugin_wp-app-store' ) );
+    }
     
     function current_url() {
         $ssl = ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] == 'on' ) ? 's' : '';
@@ -168,20 +172,37 @@ class WP_App_Store {
             if ( isset( $data['head'] ) ) {
                 $this->output['head'] .= $data['head'];
             }
-        
+			
+			$head_js = '';
+			
+			$upgrade = $this->get_client_upgrade_data();
+			$installed_version = $this->get_installed_version( 'plugin', $this->upgrade_token );
+			if ( isset( $upgrade['version'] ) && $installed_version && version_compare( $installed_version, $upgrade['version'], '<' ) ) {
+				$head_js .= "
+					WPAPPSTORE.CLIENT_LATEST_VERSION = '" . addslashes( $upgrade['version'] ) . "';
+					WPAPPSTORE.CLIENT_INSTALLED_VERSION = '" . addslashes( $installed_version ) . "';
+					WPAPPSTORE.CLIENT_UPGRADE_URL = '" . addslashes( $this->get_client_upgrade_url() ) . "';
+				";
+			}
+		
             if ( isset( $_GET['wpas-token'] ) && isset( $_GET['wpas-pid']) && isset( $_GET['wpas-ptype'] ) ) {
-                $this->output['head'] .= "
-                    <script>
+                $head_js .= "
                     WPAPPSTORE.PRODUCT_TYPE = '" . addslashes( $_GET['wpas-ptype'] ) . "';
                     WPAPPSTORE.PRODUCT_ID = '" . addslashes( $_GET['wpas-pid'] ) . "';
                     WPAPPSTORE.INSTALL_URL = '" . addslashes( $this->get_install_url( $_GET['wpas-ptype'], $_GET['wpas-token'], $_GET['wpas-pid'], '' ) ) . "';
                     WPAPPSTORE.UPGRADE_URL = '" . addslashes( $this->get_upgrade_url( $_GET['wpas-ptype'], $_GET['wpas-token'], $_GET['wpas-pid'], '' ) ) . "';
                 ";
                 if ( $version = $this->get_installed_version( $_GET['wpas-ptype'], $_GET['wpas-token'] ) ) {
-                    $this->output['head'] .= "WPAPPSTORE.INSTALLED_VERSION = '" . addslashes( $version ) . "'; ";
+                    $head_js .= "
+					WPAPPSTORE.INSTALLED_VERSION = '" . addslashes( $version ) . "';
+					";
                 }
-                $this->output['head'] .= "</script>";
             }
+			
+			if ( $head_js ) {
+				$this->output['head'] .= "<script>" . $head_js . "</script>";
+			}
+
         }
         else {
             $this->output['body'] .= $this->get_communication_error();
