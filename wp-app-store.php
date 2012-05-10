@@ -253,6 +253,7 @@ class WP_App_Store {
     
     function api_args() {
         $args['sslverify'] = false;
+		$args['timeout'] = 30;
 
         $wpas_version = $this->get_installed_version( 'plugin', $this->upgrade_token );
         if ( $wpas_version ) {
@@ -477,7 +478,7 @@ class WP_App_Store {
         if ( $this->slug != $_GET['plugin'] ) return;
         
         $url = $this->cdn_url . '/client/upgrade-popup.html';
-        $data = wp_remote_get( $url );
+        $data = wp_remote_get( $url, array( 'timeout' => 30 ) );
     
         if ( is_wp_error( $data ) || 200 != $data['response']['code'] ) {
             echo '<p>Could not retrieve version details. Please try again.</p>';
@@ -494,7 +495,7 @@ class WP_App_Store {
         if ( $info ) return $info;
         
         $url = $this->cdn_url . '/client/upgrade.json';
-        $data = wp_remote_get( $url );
+        $data = wp_remote_get( $url, array( 'timeout' => 30 ) );
     
         if ( !is_wp_error( $data ) && 200 == $data['response']['code'] ) {
             if ( $info = json_decode( $data['body'], true ) ) {
