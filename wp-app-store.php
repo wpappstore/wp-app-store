@@ -5,7 +5,7 @@ Plugin URI: http://wpappstore.com/
 Description: Purchase & install themes and plugins from top brands directly from your WordPress dashboard.
 Author: WP App Store Inc.
 Author URI: http://wpappstore.com/
-Version: 0.9
+Version: 0.9.1
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
 
@@ -144,11 +144,6 @@ class WP_App_Store {
     function handle_request() {
         if ( !$this->is_wpas_page() ) return;
         
-        if ( !defined( 'WPAPPSTORE_PRELAUNCH' ) ) {
-            $this->output['body'] .= $this->get_prelaunch_html();
-            return;
-        }
-        
         // 'Do' a local task
         if ( $this->handle_do() ) return;
 
@@ -217,21 +212,6 @@ class WP_App_Store {
         else {
             $this->output['body'] .= $this->get_communication_error();
         }
-    }
-    
-    function get_prelaunch_html() {
-        ob_start();
-        ?>
-        <div class="wrap" style="margin: 200px; background-color: lightYellow; border: 1px solid #E6DB55; padding: 0.4em 2em; text-align: center;">
-            <h2>Launching May 2012</h2>
-            <p style="font-size: 14px; line-height: 1.4em;">
-                We are still preparing for launch. Sign up to our mailing list at
-                <a href="http://wpappstore.com/">wpappstore.com</a> to be notified when
-                we launch.
-            </p>
-        </div>
-        <?php
-        return ob_get_clean();
     }
     
     function get_communication_error() {
@@ -439,6 +419,10 @@ class WP_App_Store {
         }
         
         require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+		$url = $this->current_url();
+		$type = '';
+		$title = '';
+		$nonce = '';
         
         if ( $ptype == 'theme' ) {
             require_once ABSPATH . 'wp-admin/includes/theme-install.php';
