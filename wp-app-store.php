@@ -5,7 +5,7 @@ Plugin URI: http://wpappstore.com/
 Description: Purchase & install themes and plugins from top brands directly from your WordPress dashboard.
 Author: WP App Store Inc.
 Author URI: http://wpappstore.com/
-Version: 1.0
+Version: 1.0.1
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
 
@@ -44,8 +44,14 @@ class WP_App_Store {
 			return;
 		}
         
-        $this->admin_url = admin_url( 'admin.php' );
-        $this->home_url = $this->admin_url . '?page=' . $this->slug;
+        if ( is_multisite() ) {
+			$this->admin_url = network_admin_url( 'admin.php' );
+		}
+		else {
+			$this->admin_url = admin_url( 'admin.php' );
+		}
+        
+		$this->home_url = $this->admin_url . '?page=' . $this->slug;
         $this->install_url = $this->home_url . '&wpas-do=install';
         $this->upgrade_url = $this->home_url . '&wpas-do=upgrade';
         
@@ -59,7 +65,13 @@ class WP_App_Store {
         $this->cdn_url = 'http://cdn.wpappstore.com';
         
         add_action( 'admin_init', array( $this, 'handle_request' ) );
-        add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+        
+		if ( is_multisite() ) {
+			add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
+		}
+		else {
+			add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+		}
         
         // Plugin upgrade hooks
         add_filter( 'site_transient_update_plugins', array( $this, 'site_transient_update_plugins' ) );
