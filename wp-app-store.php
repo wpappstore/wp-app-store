@@ -376,6 +376,8 @@ class WP_App_Store {
     }
     
     function get_installed_version( $product_type, $token ) {
+		if ( !is_admin() ) return false; // get_themes & get_plugins throw an error on the frontend, thanks Pippin!
+		
         if ( 'theme' == $product_type ) {
             $products = $this->get_themes();
         }
@@ -528,6 +530,8 @@ class WP_App_Store {
     // When WP gets the 'update_plugins' transient, we check for an update for
     // this plugin and add it in if there is one, sneaky!
     function site_transient_update_plugins( $trans ) {
+		if ( !is_admin() ) return false; // only need to run this when in the dashboard
+		
         $data = $this->get_client_upgrade_data();
         if ( !$data ) return $trans;
         
