@@ -233,10 +233,7 @@ class WP_App_Store {
     }
     
 	function get_affiliate_id() {
-		if ( isset( $_SERVER['WPAS_AFFILIATE_ID'] ) ) {
-			return $_SERVER['WPAS_AFFILIATE_ID'];
-		}
-		elseif ( defined( 'WPAS_AFFILIATE_ID' ) ) {
+		if ( defined( 'WPAS_AFFILIATE_ID' ) ) {
 			return WPAS_AFFILIATE_ID;
 		}
 		elseif ( $affiliate_id = get_site_transient( 'wpas_affiliate_id' ) ) {
