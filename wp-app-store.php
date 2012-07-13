@@ -35,6 +35,7 @@ class WP_App_Store {
     
     public $output = array(
         'head' => '',
+        'head_js' => '',
         'body' => ''
     );
     
@@ -180,51 +181,49 @@ class WP_App_Store {
                 $this->output['head'] .= $data['head'];
             }
 			
-			$head_js = '';
-			
-			$upgrade = $this->get_client_upgrade_data();
-			if ( isset( $upgrade['version'] ) ) {
-				$head_js .= "
-					WPAPPSTORE.CLIENT_LATEST_VERSION = '" . addslashes( $upgrade['version'] ) . "';
-				";
-			}
-			
-			$installed_version = $this->get_installed_version( 'plugin', $this->upgrade_token );
-			if ( $installed_version ) {
-				$head_js .= "
-					WPAPPSTORE.CLIENT_INSTALLED_VERSION = '" . addslashes( $installed_version ) . "';
-				";
-			}
-			
-			if ( isset( $upgrade['version'] ) && $installed_version && version_compare( $installed_version, $upgrade['version'], '<' ) ) {
-				$head_js .= "
-					WPAPPSTORE.CLIENT_UPGRADE_URL = '" . addslashes( $this->get_client_upgrade_url() ) . "';
-				";
-			}
-		
+            $upgrade = $this->get_client_upgrade_data();
+            if ( isset( $upgrade['version'] ) ) {
+                $this->output['head_js'] .= "
+                    WPAPPSTORE.CLIENT_LATEST_VERSION = '" . addslashes( $upgrade['version'] ) . "';
+                ";
+            }
+            
+            $installed_version = $this->get_installed_version( 'plugin', $this->upgrade_token );
+            if ( $installed_version ) {
+                $this->output['head_js'] .= "
+                    WPAPPSTORE.CLIENT_INSTALLED_VERSION = '" . addslashes( $installed_version ) . "';
+                ";
+            }
+            
+            if ( isset( $upgrade['version'] ) && $installed_version && version_compare( $installed_version, $upgrade['version'], '<' ) ) {
+                $this->output['head_js'] .= "
+                    WPAPPSTORE.CLIENT_UPGRADE_URL = '" . addslashes( $this->get_client_upgrade_url() ) . "';
+                ";
+            }
+        
             if ( isset( $_GET['wpas-token'] ) && isset( $_GET['wpas-pid']) && isset( $_GET['wpas-ptype'] ) ) {
-                $head_js .= "
+                $this->output['head_js'] .= "
                     WPAPPSTORE.PRODUCT_TYPE = '" . addslashes( $_GET['wpas-ptype'] ) . "';
                     WPAPPSTORE.PRODUCT_ID = '" . addslashes( $_GET['wpas-pid'] ) . "';
                     WPAPPSTORE.INSTALL_URL = '" . addslashes( $this->get_install_url( $_GET['wpas-ptype'], $_GET['wpas-token'], $_GET['wpas-pid'], '' ) ) . "';
                     WPAPPSTORE.UPGRADE_URL = '" . addslashes( $this->get_upgrade_url( $_GET['wpas-ptype'], $_GET['wpas-token'], $_GET['wpas-pid'], '' ) ) . "';
                 ";
                 if ( $version = $this->get_installed_version( $_GET['wpas-ptype'], $_GET['wpas-token'] ) ) {
-                    $head_js .= "
-					WPAPPSTORE.INSTALLED_VERSION = '" . addslashes( $version ) . "';
-					";
+                    $this->output['head_js'] .= "
+                    WPAPPSTORE.INSTALLED_VERSION = '" . addslashes( $version ) . "';
+                    ";
                 }
             }
-			
-			if ( $affiliate_id = $this->get_affiliate_id() ) {
-				$head_js .= "
-				WPAPPSTORE.AFFILIATE_ID = '" . addslashes( $affiliate_id ) . "';
-				";
-			}
-			
-			if ( $head_js ) {
-				$this->output['head'] .= "<script>" . $head_js . "</script>";
-			}
+            
+            if ( $affiliate_id = $this->get_affiliate_id() ) {
+                $this->output['head_js'] .= "
+                WPAPPSTORE.AFFILIATE_ID = '" . addslashes( $affiliate_id ) . "';
+                ";
+            }
+            
+            if ( $this->output['head_js'] ) {
+                $this->output['head'] .= "<script>" . $this->output['head_js'] . "</script>";
+            }
 
         }
         else {
@@ -413,7 +412,11 @@ class WP_App_Store {
             return;
         }
         
-        echo $this->output['body'];
+        echo $this->output['body'], $this->body_after();;
+    }
+
+    function body_after() {
+        return '';
     }
     
     function do_install( $is_upgrade = false ) {
@@ -442,6 +445,10 @@ class WP_App_Store {
             $this->output['head'] .= $data['head'];
         }
         
+        if ( $this->output['head_js'] ) {
+            $this->output['head'] .= "<script>" . $this->output['head_js'] . "</script>";
+        }
+        
         if ( isset( $data['error'] ) ) {
             $this->output['body'] .= $data['body'];
             return;
@@ -462,6 +469,7 @@ class WP_App_Store {
             $skin = new WPAS_Theme_Upgrader_Skin( compact( 'type', 'title', 'nonce', 'url' ) );
             $skin->wpas_header = isset( $data['body_header'] ) ? $data['body_header'] : '';
             $skin->wpas_footer = isset( $data['body_footer'] ) ? $data['body_footer'] : '';
+            $skin->wpas_footer .= $this->body_after();
             $upgrader = new WPAS_Theme_Upgrader( $skin );
         }
         else {
@@ -473,6 +481,7 @@ class WP_App_Store {
             $skin = new WPAS_Plugin_Upgrader_Skin( compact( 'type', 'title', 'nonce', 'url' ) );
             $skin->wpas_header = isset( $data['body_header'] ) ? $data['body_header'] : '';
             $skin->wpas_footer = isset( $data['body_footer'] ) ? $data['body_footer'] : '';
+            $skin->wpas_footer .= $this->body_after();
             $upgrader = new WPAS_Plugin_Upgrader( $skin );
         }
         
