@@ -1,4 +1,6 @@
 <?php
+if ( !class_exists( 'WP_App_Store' ) ) :
+
 class WP_App_Store {
     public $admin_url = '';
     public $home_url = '';
@@ -19,19 +21,19 @@ class WP_App_Store {
     );
     
     function __construct() {
-		// Stop if the user doesn't have access to install themes
-		if ( ! current_user_can( 'install_themes' ) ) {
-			return;
-		}
+        // Stop if the user doesn't have access to install themes
+        if ( ! current_user_can( 'install_themes' ) ) {
+            return;
+        }
         
         if ( is_multisite() ) {
-			$this->admin_url = network_admin_url( 'admin.php' );
-		}
-		else {
-			$this->admin_url = admin_url( 'admin.php' );
-		}
+            $this->admin_url = network_admin_url( 'admin.php' );
+        }
+        else {
+            $this->admin_url = admin_url( 'admin.php' );
+        }
         
-		$this->home_url = $this->admin_url . '?page=' . $this->slug;
+        $this->home_url = $this->admin_url . '?page=' . $this->slug;
         $this->install_url = $this->home_url . '&wpas-do=install';
         $this->upgrade_url = $this->home_url . '&wpas-do=upgrade';
         
@@ -46,12 +48,12 @@ class WP_App_Store {
         
         add_action( 'admin_init', array( $this, 'handle_request' ) );
         
-		if ( is_multisite() ) {
-			add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
-		}
-		else {
-			add_action( 'admin_menu', array( $this, 'admin_menu' ) );
-		}
+        if ( is_multisite() ) {
+            add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
+        }
+        else {
+            add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+        }
         
         // Plugin upgrade hooks
         add_filter( 'site_transient_update_plugins', array( $this, 'site_transient_update_plugins' ) );
@@ -159,7 +161,7 @@ class WP_App_Store {
             if ( isset( $data['head'] ) ) {
                 $this->output['head'] .= $data['head'];
             }
-			
+            
             $upgrade = $this->get_client_upgrade_data();
             if ( isset( $upgrade['version'] ) ) {
                 $this->output['head_js'] .= "
@@ -210,15 +212,15 @@ class WP_App_Store {
         }
     }
     
-	function get_affiliate_id() {
-		if ( defined( 'WPAS_AFFILIATE_ID' ) ) {
-			return WPAS_AFFILIATE_ID;
-		}
-		elseif ( $affiliate_id = get_site_transient( 'wpas_affiliate_id' ) ) {
-			return $affiliate_id;
-		}
-	}
-	
+    function get_affiliate_id() {
+        if ( defined( 'WPAS_AFFILIATE_ID' ) ) {
+            return WPAS_AFFILIATE_ID;
+        }
+        elseif ( $affiliate_id = get_site_transient( 'wpas_affiliate_id' ) ) {
+            return $affiliate_id;
+        }
+    }
+    
     function get_communication_error() {
         ob_start();
         ?>
@@ -238,7 +240,7 @@ class WP_App_Store {
     
     function api_args() {
         $args['sslverify'] = false;
-		$args['timeout'] = 30;
+        $args['timeout'] = 30;
 
         $wpas_version = $this->get_installed_version( 'plugin', $this->upgrade_token );
         if ( $wpas_version ) {
@@ -338,7 +340,7 @@ class WP_App_Store {
         }
 
         global $submenu;
-		$slug = $menu['slug'];
+        $slug = $menu['slug'];
         $submenu[$slug][0][0] = $menu['subtitle'];
         
         add_action( 'admin_print_styles', array( $this, 'enqueue_styles' ) );
@@ -363,8 +365,8 @@ class WP_App_Store {
     }
     
     function get_installed_version( $product_type, $token ) {
-		if ( !is_admin() ) return false; // get_themes & get_plugins throw an error on the frontend, thanks Pippin!
-		
+        if ( !is_admin() ) return false; // get_themes & get_plugins throw an error on the frontend, thanks Pippin!
+        
         if ( 'theme' == $product_type ) {
             $products = $this->get_themes();
         }
@@ -391,9 +393,9 @@ class WP_App_Store {
             return;
         }
         
-        echo $this->output['body'], $this->body_after();;
+        echo $this->output['body'], $this->body_after();
     }
-
+    
     function body_after() {
         return '';
     }
@@ -415,6 +417,8 @@ class WP_App_Store {
         $url = $this->api_url();
         $data = $this->api_get( $url );
         
+        //print_r( $data );
+        
         if ( !$data ) {
             $this->output['body'] .= $this->get_communication_error();
             return;
@@ -434,10 +438,10 @@ class WP_App_Store {
         }
         
         require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-		$url = $this->current_url();
-		$type = '';
-		$title = '';
-		$nonce = '';
+        $url = $this->current_url();
+        $type = '';
+        $title = '';
+        $nonce = '';
         
         if ( $ptype == 'theme' ) {
             require_once ABSPATH . 'wp-admin/includes/theme-install.php';
@@ -527,8 +531,8 @@ class WP_App_Store {
     // When WP gets the 'update_plugins' transient, we check for an update for
     // this plugin and add it in if there is one, sneaky!
     function site_transient_update_plugins( $trans ) {
-		if ( !is_admin() ) return false; // only need to run this when in the dashboard
-		
+        if ( !is_admin() ) return false; // only need to run this when in the dashboard
+        
         $data = $this->get_client_upgrade_data();
         if ( !$data ) return $trans;
         
@@ -546,3 +550,5 @@ class WP_App_Store {
         return $trans;
     }
 }
+
+endif;
