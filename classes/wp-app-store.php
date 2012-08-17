@@ -531,7 +531,7 @@ class WP_App_Store {
     // When WP gets the 'update_plugins' transient, we check for an update for
     // this plugin and add it in if there is one, sneaky!
     function site_transient_update_plugins( $trans ) {
-        if ( !is_admin() ) return false; // only need to run this when in the dashboard
+        if ( !is_admin() ) return $trans; // only need to run this when in the dashboard
         
         $data = $this->get_client_upgrade_data();
         if ( !$data ) return $trans;
