@@ -21,7 +21,7 @@ class WPAS_Plugin_Upgrader extends Plugin_Upgrader {
 		$this->strings['process_success'] = __('Plugin installed successfully.', 'wp-app-store');
 	}
 
-	function upgrade( $package ) {
+	function upgrade( $package, $upgrade_token ) {
 
 		$this->init();
 		$this->upgrade_strings();
@@ -36,7 +36,7 @@ class WPAS_Plugin_Upgrader extends Plugin_Upgrader {
 					'clear_destination' => true,
 					'clear_working' => true,
 					'hook_extra' => array(
-								'plugin' => $plugin
+						'plugin' => $upgrade_token
 					)
 				));
 

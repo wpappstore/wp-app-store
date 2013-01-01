@@ -20,7 +20,7 @@ class WPAS_Theme_Upgrader extends Theme_Upgrader {
 		$this->strings['process_success'] = __('Theme installed successfully.', 'wp-app-store');
 	}
 
-	function upgrade( $package ) {
+	function upgrade( $package, $upgrade_token ) {
 
 		$this->init();
 		$this->upgrade_strings();

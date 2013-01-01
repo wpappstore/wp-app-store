@@ -385,7 +385,7 @@ class WP_App_Store {
         if ( !is_null( $this->run_installer ) ) {
             extract( $this->run_installer );
             if ( $is_upgrade ) {
-                $upgrader->upgrade( $download_url );
+                $upgrader->upgrade( $download_url, $upgrade_token );
             }
             else {
                 $upgrader->install( $download_url );
@@ -508,6 +508,7 @@ class WP_App_Store {
         $this->run_installer = array(
             'upgrader' => $upgrader,
             'download_url' => $data['download_url'],
+            'upgrade_token' => $data['upgrade_token'],
             'is_upgrade' => $is_upgrade
         );
     }
