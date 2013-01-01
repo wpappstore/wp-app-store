@@ -65,12 +65,12 @@ class WP_App_Store {
         return $base_url . '&wpas-pid=' . urlencode( $product_id ) . '&wpas-ptype=' . urlencode( $product_type ) . '&_wpnonce=' . urlencode( $nonce ) . '&wpas-key=' . urlencode( $login_key );
     }
     
-    function get_upgrade_url( $product_type, $token, $product_id, $login_key ) {
+    function get_upgrade_url( $product_type, $product_id, $login_key ) {
         $nonce = $this->create_nonce( 'upgrade', $product_type, $product_id );
         return $this->get_install_upgrade_url( $this->upgrade_url, $nonce, $product_id, $product_type, $login_key );
     }
     
-    function get_install_url( $product_type, $token, $product_id, $login_key ) {
+    function get_install_url( $product_type, $product_id, $login_key ) {
         $nonce = $this->create_nonce( 'install', $product_type, $product_id );
         return $this->get_install_upgrade_url( $this->install_url, $nonce, $product_id, $product_type, $login_key );
     }
@@ -114,8 +114,8 @@ class WP_App_Store {
             $products = call_user_method( 'get_' . $type . 's', $this );
             foreach ( $tokens as $product_id => $token ) {
                 $result = array(
-                    'install_url' => $this->get_install_url( $type, $token, $product_id, $_GET['wpas-key'] ),
-                    'upgrade_url' => $this->get_upgrade_url( $type, $token, $product_id, $_GET['wpas-key'] )
+                    'install_url' => $this->get_install_url( $type, $product_id, $_GET['wpas-key'] ),
+                    'upgrade_url' => $this->get_upgrade_url( $type, $product_id, $_GET['wpas-key'] )
                 );
                 if ( isset( $products[$token]['Version'] ) ) {
                     $result['installed_version'] = $products[$token]['Version'];
@@ -174,12 +174,12 @@ class WP_App_Store {
                 ";
             }
         
-            if ( isset( $_GET['wpas-token'] ) && isset( $_GET['wpas-pid']) && isset( $_GET['wpas-ptype'] ) ) {
+            if ( isset( $_GET['wpas-pid']) && isset( $_GET['wpas-ptype'] ) ) {
                 $this->output['head_js'] .= "
                     WPAPPSTORE.PRODUCT_TYPE = '" . addslashes( $_GET['wpas-ptype'] ) . "';
                     WPAPPSTORE.PACKAGE_ID = '" . addslashes( $_GET['wpas-pid'] ) . "';
-                    WPAPPSTORE.INSTALL_URL = '" . addslashes( $this->get_install_url( $_GET['wpas-ptype'], $_GET['wpas-token'], $_GET['wpas-pid'], '' ) ) . "';
-                    WPAPPSTORE.UPGRADE_URL = '" . addslashes( $this->get_upgrade_url( $_GET['wpas-ptype'], $_GET['wpas-token'], $_GET['wpas-pid'], '' ) ) . "';
+                    WPAPPSTORE.INSTALL_URL = '" . addslashes( $this->get_install_url( $_GET['wpas-ptype'], $_GET['wpas-pid'], '' ) ) . "';
+                    WPAPPSTORE.UPGRADE_URL = '" . addslashes( $this->get_upgrade_url( $_GET['wpas-ptype'], $_GET['wpas-pid'], '' ) ) . "';
                 ";
                 if ( $version = $this->get_installed_version( $_GET['wpas-ptype'], $_GET['wpas-token'] ) ) {
                     $this->output['head_js'] .= "
