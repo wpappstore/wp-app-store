@@ -399,6 +399,41 @@ class WP_App_Store {
     function body_after() {
         return '';
     }
+
+    /* 
+        When a theme/plugin zip is downloaded, it is saved with a temporary
+        name and the .zip extension is replaced with .tmp. For example, 
+        wp-app-store.zip would be downloaded as wp-app-store.tmp. It is then
+        unzipped to a temporary folder of the same name.
+
+        If the zip contains a single folder (as it should), WP installs this
+        single folder as appropriate. However, if the zip contains all the
+        plugin/theme files at the root of the zip file, it installs the
+        temporary folder.
+
+        Some of our publishers' theme/plugin zips contain a single folder and
+        others don't, that's why it was only occurring some of the time. It
+        never occurs for any of the plugin/theme zips in the .org repo because
+        they all contain a single folder. Also, if you upload a zip file, it
+        doesn't run the same code as when it needs to download the zip and so
+        doesn't name the file .tmp.
+    */
+    function upgrader_source_selection( $source ) {
+        $regex = '@\.tmp/$@';
+        if ( !preg_match( $regex, $source ) ) {
+            return $source;
+        }
+
+        global $wp_filesystem;
+
+        $new_source = trailingslashit( preg_replace( '@\.tmp/$@', '', $source ) );
+        
+        if ( $wp_filesystem->move( $source, $new_source ) ) {
+            return $new_source;
+        }
+
+        return $source;
+    }
     
     function do_install( $is_upgrade = false ) {
         if ( !$this->verify_nonce( $_GET['_wpnonce'], $_GET['wpas-do'], $_GET['wpas-ptype'], $_GET['wpas-pid'] ) ) {
@@ -436,6 +471,8 @@ class WP_App_Store {
             $this->output['body'] .= $data['body'];
             return;
         }
+
+        add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ) );
         
         require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
         $url = $this->current_url();
