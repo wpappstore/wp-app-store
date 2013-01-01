@@ -93,16 +93,8 @@ class WP_App_Store {
         return wp_verify_nonce( $nonce, 'wpas-' . $action . '-' . $type . '-' . $product_id );
     }
     
-    // Themes are keyed by theme name instead of their directory name,
-    // need to re-key 'em
     function get_themes() {
-        $result = array();
-        $themes = get_themes();
-        foreach ( $themes as $theme ) {
-            $key = $theme['Stylesheet'];
-            $result[$key] = $theme;
-        }
-        return $result;
+        return wp_get_themes();
     }
     
     function get_plugins() {
