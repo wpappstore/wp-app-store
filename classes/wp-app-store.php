@@ -61,18 +61,18 @@ class WP_App_Store {
         add_filter( 'plugins_api', array( $this, 'plugins_api' ), 10, 3 );
     }
     
-    function get_install_upgrade_url( $base_url, $nonce, $product_id, $product_type, $login_key ) {
-        return $base_url . '&wpas-pid=' . urlencode( $product_id ) . '&wpas-ptype=' . urlencode( $product_type ) . '&_wpnonce=' . urlencode( $nonce ) . '&wpas-key=' . urlencode( $login_key );
+    function get_install_upgrade_url( $base_url, $nonce, $package_id, $product_type, $login_key ) {
+        return $base_url . '&wpas-pid=' . urlencode( $package_id ) . '&wpas-ptype=' . urlencode( $product_type ) . '&_wpnonce=' . urlencode( $nonce ) . '&wpas-key=' . urlencode( $login_key );
     }
     
-    function get_upgrade_url( $product_type, $product_id, $login_key ) {
-        $nonce = $this->create_nonce( 'upgrade', $product_type, $product_id );
-        return $this->get_install_upgrade_url( $this->upgrade_url, $nonce, $product_id, $product_type, $login_key );
+    function get_upgrade_url( $product_type, $package_id, $login_key ) {
+        $nonce = $this->create_nonce( 'upgrade', $product_type, $package_id );
+        return $this->get_install_upgrade_url( $this->upgrade_url, $nonce, $package_id, $product_type, $login_key );
     }
     
-    function get_install_url( $product_type, $product_id, $login_key ) {
-        $nonce = $this->create_nonce( 'install', $product_type, $product_id );
-        return $this->get_install_upgrade_url( $this->install_url, $nonce, $product_id, $product_type, $login_key );
+    function get_install_url( $product_type, $package_id, $login_key ) {
+        $nonce = $this->create_nonce( 'install', $product_type, $package_id );
+        return $this->get_install_upgrade_url( $this->install_url, $nonce, $package_id, $product_type, $login_key );
     }
 
     function get_client_upgrade_url() {
@@ -85,12 +85,12 @@ class WP_App_Store {
         return sprintf( 'http%s://%s%s%s', $ssl, $_SERVER['SERVER_NAME'], $port, $_SERVER['REQUEST_URI'] );
     }
     
-    function create_nonce( $action, $type, $product_id ) {
-        return wp_create_nonce( 'wpas-' . $action . '-' . $type . '-' . $product_id );
+    function create_nonce( $action, $type, $package_id ) {
+        return wp_create_nonce( 'wpas-' . $action . '-' . $type . '-' . $package_id );
     }
     
-    function verify_nonce( $nonce, $action, $type, $product_id ) {
-        return wp_verify_nonce( $nonce, 'wpas-' . $action . '-' . $type . '-' . $product_id );
+    function verify_nonce( $nonce, $action, $type, $package_id ) {
+        return wp_verify_nonce( $nonce, 'wpas-' . $action . '-' . $type . '-' . $package_id );
     }
     
     function get_themes() {
@@ -112,15 +112,15 @@ class WP_App_Store {
         $results = array();
         foreach ( $product_types as $type => $tokens ) {
             $products = call_user_method( 'get_' . $type . 's', $this );
-            foreach ( $tokens as $product_id => $token ) {
+            foreach ( $tokens as $package_id => $token ) {
                 $result = array(
-                    'install_url' => $this->get_install_url( $type, $product_id, $_GET['wpas-key'] ),
-                    'upgrade_url' => $this->get_upgrade_url( $type, $product_id, $_GET['wpas-key'] )
+                    'install_url' => $this->get_install_url( $type, $package_id, $_GET['wpas-key'] ),
+                    'upgrade_url' => $this->get_upgrade_url( $type, $package_id, $_GET['wpas-key'] )
                 );
                 if ( isset( $products[$token]['Version'] ) ) {
                     $result['installed_version'] = $products[$token]['Version'];
                 }
-                $results[$type][$product_id] = $result;
+                $results[$type][$package_id] = $result;
             }
         }
         
