@@ -5,7 +5,7 @@ Plugin URI: http://wpappstore.com/
 Description: Purchase & install themes and plugins from top brands directly from your WordPress dashboard.
 Author: WP App Store Inc.
 Author URI: http://wpappstore.com/
-Version: 1.0.2
+Version: 1.0.3
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
 
