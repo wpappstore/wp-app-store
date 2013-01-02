@@ -66,12 +66,12 @@ class WP_App_Store {
     }
     
     function get_upgrade_url( $product_type, $package_id, $login_key ) {
-        $nonce = $this->create_nonce( 'upgrade', $product_type, $package_id );
+        $nonce = $this->create_nonce( 'upgrade', $product_type );
         return $this->get_install_upgrade_url( $this->upgrade_url, $nonce, $package_id, $product_type, $login_key );
     }
     
     function get_install_url( $product_type, $package_id, $login_key ) {
-        $nonce = $this->create_nonce( 'install', $product_type, $package_id );
+        $nonce = $this->create_nonce( 'install', $product_type );
         return $this->get_install_upgrade_url( $this->install_url, $nonce, $package_id, $product_type, $login_key );
     }
 
@@ -85,12 +85,12 @@ class WP_App_Store {
         return sprintf( 'http%s://%s%s%s', $ssl, $_SERVER['SERVER_NAME'], $port, $_SERVER['REQUEST_URI'] );
     }
     
-    function create_nonce( $action, $type, $package_id ) {
-        return wp_create_nonce( 'wpas-' . $action . '-' . $type . '-' . $package_id );
+    function create_nonce( $action, $type ) {
+        return wp_create_nonce( 'wpas-' . $action . '-' . $type );
     }
     
-    function verify_nonce( $nonce, $action, $type, $package_id ) {
-        return wp_verify_nonce( $nonce, 'wpas-' . $action . '-' . $type . '-' . $package_id );
+    function verify_nonce( $nonce, $action, $type ) {
+        return wp_verify_nonce( $nonce, 'wpas-' . $action . '-' . $type );
     }
     
     function get_themes() {
@@ -428,7 +428,7 @@ class WP_App_Store {
     }
     
     function do_install( $is_upgrade = false ) {
-        if ( !$this->verify_nonce( $_GET['_wpnonce'], $_GET['wpas-do'], $_GET['wpas-ptype'], $_GET['wpas-pid'] ) ) {
+        if ( !$this->verify_nonce( $_GET['_wpnonce'], $_GET['wpas-do'], $_GET['wpas-ptype'] ) ) {
             die( "Cheatin' eh?" );
         }
 
