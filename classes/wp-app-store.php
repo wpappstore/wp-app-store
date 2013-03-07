@@ -10,6 +10,7 @@ class WP_App_Store {
     public $cdn_url;
     
     public $slug = 'wp-app-store';
+    public $title = 'WP App Store';
     public $upgrade_token = 'wp-app-store/wp-app-store.php';
     
     public $run_installer = null;
@@ -45,8 +46,6 @@ class WP_App_Store {
         }
         
         $this->cdn_url = 'http://cdn.wpappstore.com';
-        
-        add_action( 'admin_init', array( $this, 'handle_request' ) );
         
         if ( is_multisite() ) {
             add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
@@ -126,10 +125,23 @@ class WP_App_Store {
         
         return array( 'wpas-products' => $results );
     }
+
+    function admin_title( $admin_title ) {
+        if ( is_network_admin() )
+            $admin_title = __( 'Network Admin' );
+        elseif ( is_user_admin() )
+            $admin_title = __( 'Global Dashboard' );
+        else
+            $admin_title = get_bloginfo( 'name' );
+
+        return sprintf( __( '%1$s &lsaquo; %2$s &#8212; WordPress' ), $this->title, $admin_title );
+    }
     
     function handle_request() {
-        if ( !$this->is_wpas_page() ) return;
+        $this->load_assets();
         
+        add_filter( 'admin_title', array( $this, 'admin_title' ) );
+
         // 'Do' a local task
         if ( $this->handle_do() ) return;
 
@@ -284,59 +296,25 @@ class WP_App_Store {
             return true;
         }
     }
-
-    function get_menu() {
-        $menu = get_site_transient( 'wpas_menu' );
-        if ( $menu ) return $menu;
-        
-        // Let's refresh the menu
-        $url = $this->cdn_url . '/client/menu.json';
-        $data = wp_remote_get( $url );
-    
-        if ( !is_wp_error( $data ) && 200 == $data['response']['code'] ) {
-            $menu = json_decode( $data['body'], true );
-        }
-        
-        // Try retrieve a backup from the last refresh time
-        if ( !$menu ) {
-            $menu = get_site_transient( 'wpas_menu_backup' );
-        }
-
-        // Not even a backup? Yikes, let's use the hardcoded menu
-        if ( !$menu ) {
-            $menu = array(
-                'slug' => 'wp-app-store',
-                'title' => 'WP App Store',
-                'subtitle' => 'Home',
-                'position' => 999,
-                'submenu' => array(
-                    'wp-app-store-themes' => 'Themes',
-                    'wp-app-store-plugins' => 'Plugins'
-                )
-            );
-        }
-        
-        set_site_transient( 'wpas_menu', $menu, 60*60*24 );
-        set_site_transient( 'wpas_menu_backup', $menu );
-        
-        return $menu;
-    }
     
     function admin_menu() {
-        $menu = $this->get_menu();
-        
-        add_menu_page( $menu['title'], $menu['title'], 'install_themes', $menu['slug'], array( $this, 'render_page' ), null, $menu['position'] );
+        global $_registered_pages;
 
-        foreach ( $menu['submenu'] as $slug => $title ) {
-            add_submenu_page( $menu['slug'], $title . ' &lsaquo; ' . $menu['title'], $title, 'install_themes', $slug, array( $this, 'render_page' ) );
+        $callback = array( $this, 'render_page' );
+
+        $hookname = get_plugin_page_hookname( $this->slug, '' );
+        add_action( $hookname, $callback );
+        $_registered_pages[$hookname] = true;
+        $hooknames[] = $hookname;
+
+        $hooknames[] = add_plugins_page( $this->title, 'Plugin Store', 'install_plugins', 'wp-app-store-plugins', $callback );
+        $hooknames[] = add_theme_page( $this->title, 'Theme Store', 'install_themes', 'wp-app-store-themes', $callback );
+
+        foreach ( $hooknames as $hookname ) {
+            add_action( 'load-' . $hookname , array( $this, 'handle_request' ) );
         }
-
-        global $submenu;
-        $slug = $menu['slug'];
-        $submenu[$slug][0][0] = $menu['subtitle'];
         
-        add_action( 'admin_print_styles', array( $this, 'enqueue_styles' ) );
-        add_action( 'admin_head', array( $this, 'admin_head' ) );
+        add_action( 'admin_print_styles', array( $this, 'enqueue_global_styles' ) );
     }
     
     function admin_head() {
@@ -344,16 +322,19 @@ class WP_App_Store {
         echo $this->output['head'];
     }
     
-    function is_wpas_page() {
-        return ( isset( $_GET['page'] ) && preg_match( '@^' . $this->slug . '@', $_GET['page'] ) );
-    }
-    
-    function enqueue_styles() {
+    function enqueue_global_styles() {
         wp_enqueue_style( $this->slug . '-global', $this->cdn_url . '/asset/css/client-global.css' );
-        if ( !$this->is_wpas_page() ) return;
+    }
+
+    function load_assets() {
         add_thickbox();
         wp_enqueue_script( 'theme-preview' );
         wp_enqueue_script( 'theme' );
+
+        add_action( 'admin_head', array( $this, 'admin_head' ) );
+        
+        // Cleanup some old transient
+        delete_site_transient( 'wpas_menu_backup' );
     }
     
     function get_installed_version( $product_type, $token ) {
