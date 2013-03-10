@@ -24,7 +24,7 @@ if ( version_compare( PHP_VERSION, '5.2', '<' ) ) {
 
 function wp_app_store_init() {
 	global $wpappstore;
-	$wpappstore = new WP_App_Store();
+	$wpappstore = new WP_App_Store( __FILE__ );
 }
 
 add_action( 'init', 'wp_app_store_init' );

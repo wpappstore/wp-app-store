@@ -12,6 +12,10 @@ class WP_App_Store {
     public $api_request_url;
     public $api_request_method;
     public $api_request_error;
+
+    private $plugin_file_path;
+    private $plugin_dir_path;
+    private $plugin_basename;
     
     public $slug = 'wp-app-store';
     public $title = 'WP App Store';
@@ -25,11 +29,15 @@ class WP_App_Store {
         'body' => ''
     );
     
-    function __construct() {
+    function __construct( $plugin_file_path ) {
         // Stop if the user doesn't have access to install themes
         if ( ! current_user_can( 'install_themes' ) ) {
             return;
         }
+
+        $this->plugin_file_path = $plugin_file_path;
+        $this->plugin_dir_path = plugin_dir_path( $plugin_file_path );
+        $this->plugin_basename = plugin_basename( $plugin_file_path );
         
         if ( is_multisite() ) {
             $this->admin_url = network_admin_url( 'admin.php' );
@@ -57,6 +65,8 @@ class WP_App_Store {
         else {
             add_action( 'admin_menu', array( $this, 'admin_menu' ) );
         }
+
+        add_filter( 'plugin_action_links_' . $this->plugin_basename, array( $this, 'plugin_action_links' ) );
         
         // Plugin upgrade hooks
         add_filter( 'site_transient_update_plugins', array( $this, 'site_transient_update_plugins' ) );
@@ -227,6 +237,12 @@ class WP_App_Store {
         elseif ( $affiliate_id = get_site_transient( 'wpas_affiliate_id' ) ) {
             return $affiliate_id;
         }
+    }
+
+    function plugin_action_links( $links ) {
+        $links[] = sprintf( '<a href="%s">%s</a>', 'themes.php?page=wp-app-store-themes', __( 'Themes', 'wp-app-store' ) );
+        $links[] = sprintf( '<a href="%s">%s</a>', 'plugins.php?page=wp-app-store-plugins', __( 'Plugins', 'wp-app-store' ) );
+        return $links;
     }
     
     function get_communication_error() {
