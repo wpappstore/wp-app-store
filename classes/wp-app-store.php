@@ -56,8 +56,13 @@ class WP_App_Store {
         else {
             $this->api_url = 'https://wpappstore.com/api/client';
         }
-        
-        $this->cdn_url = 'http://cdn.wpappstore.com';
+                
+        if ( defined( 'WPAS_CDN_URL' ) ) {
+            $this->cdn_url = WPAS_CDN_URL;
+        }
+        else {
+            $this->cdn_url = 'http://cdn.wpappstore.com';
+        }
         
         if ( is_multisite() ) {
             add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
