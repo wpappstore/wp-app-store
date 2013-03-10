@@ -715,7 +715,7 @@ class WP_App_Store {
         if ( version_compare( $installed_version, $data['version'], '<' ) ) {
             $trans->response[$ut]->url = 'https://wpappstore.com';
             $trans->response[$ut]->slug = $this->slug;
-            $trans->response[$ut]->package = $data['download_url'];
+            $trans->response[$ut]->package = $data['download_url'] . '?source=upgrade';
             $trans->response[$ut]->new_version = $data['version'];
             $trans->response[$ut]->id = '0';
         }
