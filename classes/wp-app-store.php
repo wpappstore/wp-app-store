@@ -8,6 +8,10 @@ class WP_App_Store {
     public $upgrade_url = '';
     public $api_url;
     public $cdn_url;
+
+    public $api_request_url;
+    public $api_request_method;
+    public $api_request_error;
     
     public $slug = 'wp-app-store';
     public $title = 'WP App Store';
@@ -229,11 +233,137 @@ class WP_App_Store {
         ob_start();
         ?>
         <div class="wrap">
-            <h2>Communication Error</h2>
-            <p><?php _e( 'Sorry, we could not reach the WP App Store. Please try again.' ); ?></p>
+            <div id="icon-tools" class="icon32"><br></div>
+            <h2>WP App Store Communication Error</h2>
+
+            <div style="font-size: 14px; line-height: 1.4em; width: 600px;">
+
+            <?php
+            $sorry = __( 'Sorry, there was a problem communicating with the WP App Store server. ', 'wp-app-store' );
+            ?>
+
+            <?php if ( !function_exists( 'fsockopen' ) && !function_exists( 'curl_init' ) ) : ?>
+                
+                <p><?php echo $sorry, '</p><p>'; _e( 'We\'ve detected that neither fsockopen nor
+                cURL are enabled on your server. The WP App Store plugin (as well as other plugins 
+                and parts of WordPress won\'t work until this is enabled. Please contact your web 
+                hosting provider.' ); ?></p>
+                
+            <?php else : ?>
+                
+                <p><?php echo $sorry; _e( 'Please try again.', 'wp-app-store' ); ?></p>
+
+                <p><?php printf( __( 'If the problem persists, please email %s and include a copy
+                of the diagnostic information below. With these details, 
+                we should be able to pin point the problem for you.' ), 
+                '<a href="mailto:hi@wpappstore.com">hi@wpappstore.com</a>' ); ?></p>
+
+                <?php
+                $extra = "\r\n" . __( 'Request', 'wp-app-store' ) . ":\r\n";
+                $extra .= $this->api_request_method . ' ' . $this->api_request_url . "\r\n";
+                $extra .= print_r( $this->api_request_error, true );
+                $extra .= print_r( $this->api_args(), true );
+
+                $this->print_diagnostic_textarea( $extra );
+                ?>
+
+            <?php endif; ?>
+
+            </div>
         </div>
         <?php
         return ob_get_clean();
+    }
+
+    function print_diagnostic_textarea( $extra = '' ) {
+        echo '<textarea cols="100" rows="20" style="font-family: monospace;">';
+
+        _e( 'WordPress', 'wp-app-store' ); echo ': ';
+        if ( is_multisite() ) echo 'WPMU'; else echo 'WP'; echo bloginfo('version');
+        echo "\r\n";
+
+        _e( 'Web Server', 'wp-app-store' ); echo ': ';
+        echo $_SERVER['SERVER_SOFTWARE'];
+        echo "\r\n";
+
+        _e( 'PHP', 'wp-app-store' ); echo ': ';
+        if ( function_exists( 'phpversion' ) ) echo esc_html( phpversion() );
+        echo "\r\n";
+
+        _e( 'MySQL', 'wp-app-store' ); echo ': ';
+        if ( function_exists( 'mysql_get_server_info' ) ) echo esc_html( mysql_get_server_info() );
+        echo "\r\n";
+        
+        _e( 'WP Memory Limit', 'wp-app-store' ); echo ': ';
+        echo WP_MEMORY_LIMIT;
+        echo "\r\n";
+        
+        _e( 'Debug Mode', 'wp-app-store' ); echo ': ';
+        if ( defined('WP_DEBUG') && WP_DEBUG ) { echo 'Yes'; } else { echo 'No'; }
+        echo "\r\n";
+        
+        _e( 'WP Max Upload Size', 'wp-app-store' ); echo ': ';
+        echo wp_convert_bytes_to_hr( wp_max_upload_size() );
+        echo "\r\n";
+        
+        _e( 'PHP Post Max Size', 'wp-app-store' ); echo ': ';
+        if ( function_exists( 'ini_get' ) ) echo ini_get('post_max_size');
+        echo "\r\n";
+        
+        _e( 'PHP Time Limit', 'wp-app-store' ); echo ': ';
+        if ( function_exists( 'ini_get' ) ) echo ini_get('max_execution_time');
+        echo "\r\n";
+
+        _e( 'fsockopen', 'wp-app-store' ); echo ': ';
+        if ( function_exists( 'fsockopen' ) ) {
+            _e('Enabled', 'wp-app-store' );
+        } else {
+            _e( 'Disabled', 'wp-app-store' );
+        }
+        echo "\r\n";
+
+        _e( 'cURL', 'wp-app-store' ); echo ': ';
+        if ( function_exists( 'curl_init' ) ) {
+            _e('Enabled', 'wp-app-store' );
+        } else {
+            _e( 'Disabled', 'wp-app-store' );
+        }
+        echo "\r\n";
+
+        $url = 'https://google.com';
+        _e( 'WP Remote Get', 'wp-app-store' ); 
+        echo ' (' . $url . '):';
+        $params = array(
+            'sslverify' => false,
+            'timeout' => 60,
+            'body' => $request
+        );
+        $response = wp_remote_get( $url, $params );
+        if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
+            _e('Success', 'wp-app-store' );
+        } elseif ( is_wp_error( $response ) ) {
+            _e( 'Failed:', 'wp-app-store' ) . ' ' . $response->get_error_message();
+        } else {
+            _e( 'Failed', 'wp-app-store' );
+        }
+        echo "\r\n\r\n";
+
+        _e( 'Active Plugins', 'wp-app-store' ); echo ":\r\n";
+
+        $active_plugins = (array) get_option( 'active_plugins', array() );
+
+        if ( is_multisite() )
+            $active_plugins = array_merge( $active_plugins, get_site_option( 'active_sitewide_plugins', array() ) );
+
+        foreach ( $active_plugins as $plugin ) {
+            $plugin_data = @get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
+            if ( empty( $plugin_data['Name'] ) ) continue;
+            echo $plugin_data['Name'] . ' (v' . $plugin_data['Version'] . ') ' . __( 'by', 'wp-app-store' ) . ' ' . $plugin_data['AuthorName'] . "\r\n";
+        }
+
+        echo $extra;
+
+        echo '</textarea>';
     }
     
     function api_url() {
@@ -261,31 +391,47 @@ class WP_App_Store {
     
     function api_post( $url, $body ) {
         $args = $this->api_args();
+        $args['method'] = 'POST';
         $args['body'] = $body;
-        
-        $data = wp_remote_post( $url, $args );
-        
-        //print_r($data);
-        
-        if ( !is_wp_error( $data ) && 200 == $data['response']['code'] && $data = json_decode( $data['body'], true ) ) {
-            return $data;
-        }
-        
-        return false;
+        return $this->api_request( $url, $args );
     }
     
     function api_get( $url ) {
         $args = $this->api_args();
-        
-        $data = wp_remote_get( $url, $args );
+        $args['method'] = 'GET';
+        return $this->api_request( $url, $args );
+    }
 
-        //print_r($data);
+    function api_request( $url, $args ) {
+        $this->api_request_error = null;
+        $this->api_request_url = $url;
+        $this->api_request_method = $args['method'];
         
-        if ( !is_wp_error( $data ) && 200 == $data['response']['code'] && $data = json_decode( $data['body'], true ) ) {
-            return $data;
+        $response = $this->api_response( wp_remote_request( $url, $args ) );
+        
+        if ( is_wp_error( $response ) ) {
+            $this->api_request_error = $response;
+            return false;
         }
         
-        return false;
+        return $response;
+    }
+
+    function api_response( $response ) {
+        if ( is_wp_error( $response ) ) {
+            return $response;
+        }
+
+        $response_code = wp_remote_retrieve_response_code( $response );
+        if ( 200 != $response_code ) {
+            return new WP_Error( 'http_status', trim( wp_remote_retrieve_response_message( $response ) ), $response_code );
+        }
+
+        if ( !( $decoded_data = json_decode( $response['body'], true ) ) ) {
+            return new WP_Error( 'json_decode', __( 'Error decoding the JSON response received from the server.' ), $response['body'] );
+        }
+
+        return $decoded_data;
     }
     
     function handle_do() {
